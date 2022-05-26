@@ -2,6 +2,8 @@
 #include <fstream>
 #include <unistd.h>
 #include <cstdlib>
+#include <sstream>
+
 #include "ftxui/dom/elements.hpp"
 #include "ftxui/component/component.hpp"
 #include "ftxui/screen/screen.hpp"
@@ -9,7 +11,7 @@
 #include "ftxui/screen/string.hpp"
 #include "ftxui/util/ref.hpp"
 
-#include <sstream>
+#include "turing.hpp"
 
 std::stringstream ss;
 std::vector<std::string> lines;
@@ -47,32 +49,59 @@ std::vector<std::string> breakBySpaces(std::string str){
 }
 
 int main() {
-    srand(time(NULL) + clock());
-    std::string inputStr;
-    std::string errPos;
+//    std::string inputStr;
+//    std::string errPos;
+//
+//    auto component = Container::Vertical({
+//    });
+//
+//    auto renderer = Renderer(component, [&]{
+//        return vbox({
+//            text("Программа"),
+//        }) | border | flex;
+//    });
+//
+//    auto screen = ScreenInteractive::TerminalOutput();
+//
+//    auto toRend = CatchEvent(renderer, [&](Event event){
+//        if(event == Event::Character('q') || event == Event::Escape){
+//            screen.ExitLoopClosure()();
+//            return true;
+//        }
+//
+//        if(event == Event::Return){
+//        }
+//
+//    });
+//    screen.Loop(toRend);
 
-    auto component = Container::Vertical({
-    });
+    TuringMachine machine;   
+    TuringState state;
+    TuringTape tape("000__");
+    state.alph = "01_";
+    state.comment = "Комментарий";
+    state.currState = 0;
+    state.position = 0;
+    state.tape = tape;
+    state.table.resize(2);
+    for(int i = 0; i < 2; i++){
+        state.table[i].resize(3);
+    }
+    TuringTurn turn1{0, '0', 0, '1', Right};
+    TuringTurn turn2{0, '_', -1, '_', NoMove};
+    state.table[0][0] = turn1;
+    state.table[0][2] = turn2;
 
-    auto renderer = Renderer(component, [&]{
-        return vbox({
-            text("Программа"),
-        }) | border | flex;
-    });
-
-    auto screen = ScreenInteractive::TerminalOutput();
-
-    auto toRend = CatchEvent(renderer, [&](Event event){
-        if(event == Event::Character('q') || event == Event::Escape){
-            screen.ExitLoopClosure()();
-            return true;
-        }
-
-        if(event == Event::Return){
-        }
-
-    });
-    screen.Loop(toRend);
+    machine.loadState(state);
+    std::cout << machine.getTapeStr() << "\n";
+    machine.makeTurn();
+    std::cout << machine.getTapeStr() << "\n";
+    machine.makeTurn();
+    std::cout << machine.getTapeStr() << "\n";
+    machine.makeTurn();
+    std::cout << machine.getTapeStr() << "\n";
+    machine.makeTurn();
+    std::cout << machine.getTapeStr() << "\n";
 
     return 0;
 }
