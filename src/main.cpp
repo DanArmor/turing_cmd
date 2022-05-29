@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <sstream>
+#include <locale>
 
 #include "ftxui/dom/elements.hpp"
 #include "ftxui/component/component.hpp"
@@ -74,34 +75,38 @@ int main() {
 //
 //    });
 //    screen.Loop(toRend);
-
+    
     TuringMachine machine;   
     TuringState state;
-    TuringTape tape("000__");
-    state.alph = "01_";
-    state.comment = "Комментарий";
     state.currState = 0;
     state.position = 0;
-    state.tape = tape;
-    state.table.resize(2);
-    for(int i = 0; i < 2; i++){
-        state.table[i].resize(3);
-    }
-    TuringTurn turn1{0, '0', 0, '1', Right};
-    TuringTurn turn2{0, '_', -1, '_', NoMove};
-    state.table[0][0] = turn1;
-    state.table[0][2] = turn2;
+
+    state.tape.setChar(0, '0');
+    state.tape.setChar(1, '0');
+    state.tape.setChar(2, '0');
+    state.tape.setChar(3, '_');
+    state.tape.setChar(4, '_');
+
+    TuringTurn turn1{0, '1', Right};
+    TuringTurn turn2{-1, '_', NoMove};
+
+    machine.setAlph("01_");
+    machine.setComment("Комментарий");
+
+    machine.addTurn(std::make_pair(0, '0'), turn1);
+    machine.addTurn(std::make_pair(0, '_'), turn2);
+
 
     machine.loadState(state);
-    std::cout << machine.getTapeStr() << "\n";
+    std::cout << machine.getStrView(0, 5) << "\n";
     machine.makeTurn();
-    std::cout << machine.getTapeStr() << "\n";
+    std::cout << machine.getStrView(0, 5) << "\n";
     machine.makeTurn();
-    std::cout << machine.getTapeStr() << "\n";
+    std::cout << machine.getStrView(0, 5) << "\n";
     machine.makeTurn();
-    std::cout << machine.getTapeStr() << "\n";
+    std::cout << machine.getStrView(0, 5) << "\n";
     machine.makeTurn();
-    std::cout << machine.getTapeStr() << "\n";
+    std::cout << machine.getStrView(0, 5) << "\n";
 
     return 0;
 }

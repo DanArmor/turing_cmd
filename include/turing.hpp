@@ -10,14 +10,14 @@
 
 enum TuringDirection { Left, Right, NoMove };
 
-const char LAMBDA = 'λ';
+const char EMPTY = '$';
 
 struct TuringTurn {
     TuringTurn()
         : oldState(-1),
-          oldSymbol(LAMBDA),
+          oldSymbol(EMPTY),
           newState(-1),
-          newSymbol(LAMBDA),
+          newSymbol(EMPTY),
           direction(NoMove) {}
     TuringTurn(int oldState, char oldSymbol, int newState, char newSymbol,
                TuringDirection direction)
@@ -26,6 +26,8 @@ struct TuringTurn {
           newState(newState),
           newSymbol(newSymbol),
           direction(direction) {}
+    TuringTurn(int newState, char newSymbol, TuringDirection direction)
+        : newState(newState), newSymbol(newSymbol), direction(direction) {}
     ~TuringTurn() {}
     int oldState;
     char oldSymbol;
@@ -43,7 +45,7 @@ class TuringTape {
 
     char getChar(int pos) {
         if (tape.count(pos) == 0) {
-            return '\0';
+            return EMPTY;
         } else {
             return tape[pos];
         }
@@ -68,7 +70,23 @@ class TuringMachine {
    public:
     TuringMachine() {}
     ~TuringMachine() {}
+
     void loadState(TuringState newState) { state = newState; }
+    void setAlph(std::string str) {
+        alph.clear();
+        alph.insert(EMPTY);
+        for (auto c : str) {
+            alph.insert(c);
+        }
+    }
+    void setComment(std::string const &str) { comment = str; }
+
+    void addTurn(TuringTurn turn) {
+        table[std::make_pair(turn.oldState, turn.oldSymbol)] = turn;
+    }
+    void addTurn(std::pair<int, char> old, TuringTurn turn) {
+        table[old] = turn;
+    }
 
     char getCurChar(void) { return state.tape.getChar(state.position); }
 
@@ -89,7 +107,14 @@ class TuringMachine {
         }
     }
 
-    std::string getTapeStr(void) { return state.tape.getStr(); }
+    std::map<int, char> getTapeStr(void) { return state.tape.getTapeMap(); }
+    std::string getStrView(int from, int to) {
+        std::string out;
+        for (int i = from; i <= to; i++) {
+            out += state.tape.getChar(i);
+        }
+        return out;
+    }
 
     void clear(void) { stop = false; }
 
