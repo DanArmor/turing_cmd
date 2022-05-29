@@ -84,7 +84,7 @@ void TuringMachine::makeTurn(void) {
     }
 }
 
-std::map<int, char> TuringMachine::getTapeStr(void) {
+std::map<int, char> TuringMachine::getTapeMap(void) {
     return state.tape.getTapeMap();
 }
 std::string TuringMachine::getStrView(int from, int to) {
@@ -95,4 +95,7 @@ std::string TuringMachine::getStrView(int from, int to) {
     return out;
 }
 
+int TuringMachine::getCurPosition(void){ return state.position; }
+int TuringMachine::getCurState(void) { return state.currState; }
+bool TuringMachine::isDone(void) { return stop; }
 void TuringMachine::clear(void) { stop = false; }

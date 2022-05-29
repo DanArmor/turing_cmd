@@ -63,9 +63,13 @@ class TuringMachine {
     void makeTurn(void);
 
     char getCurChar(void);
-    std::map<int, char> getTapeStr(void);
+    std::map<int, char> getTapeMap(void);
     std::string getStrView(int from, int to);
 
+    int getCurState(void);
+    int getCurPosition(void);
+
+    bool isDone(void);
     void clear(void);
 
    private:
