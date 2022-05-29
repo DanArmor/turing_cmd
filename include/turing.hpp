@@ -10,14 +10,14 @@
 
 enum TuringDirection { Left, Right, NoMove };
 
-const char EMPTY = '$';
+const char TURING_EMPTY = '$';
 
 struct TuringTurn {
     TuringTurn()
         : oldState(-1),
-          oldSymbol(EMPTY),
+          oldSymbol(TURING_EMPTY),
           newState(-1),
-          newSymbol(EMPTY),
+          newSymbol(TURING_EMPTY),
           direction(NoMove) {}
     TuringTurn(int oldState, char oldSymbol, int newState, char newSymbol,
                TuringDirection direction)
@@ -45,7 +45,7 @@ class TuringTape {
 
     char getChar(int pos) {
         if (tape.count(pos) == 0) {
-            return EMPTY;
+            return TURING_EMPTY;
         } else {
             return tape[pos];
         }
@@ -74,7 +74,7 @@ class TuringMachine {
     void loadState(TuringState newState) { state = newState; }
     void setAlph(std::string str) {
         alph.clear();
-        alph.insert(EMPTY);
+        alph.insert(TURING_EMPTY);
         for (auto c : str) {
             alph.insert(c);
         }
