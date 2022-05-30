@@ -2,6 +2,7 @@
 #ifndef _INC_TURING_HPP
 #define _INC_TURING_HPP
 
+#include <initializer_list>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -42,6 +43,8 @@ class TuringTape {
 
 struct TuringState {
     TuringState();
+    TuringState(std::pair<int, int> posAndState,
+                std::initializer_list<std::pair<int, char>> chars);
     ~TuringState();
     TuringTape tape;
     int position;
@@ -51,6 +54,9 @@ struct TuringState {
 class TuringMachine {
    public:
     TuringMachine();
+    TuringMachine(
+        std::initializer_list<std::pair<std::pair<int, char>, TuringTurn>>
+            turns);
     ~TuringMachine();
 
     void loadState(TuringState newState);

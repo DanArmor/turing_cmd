@@ -39,11 +39,25 @@ std::map<int, char> TuringTape::getTapeMap(void) { return tape; }
 // Turing state section
 
 TuringState::TuringState() {}
+TuringState::TuringState(std::pair<int, int> posAndState,
+                         std::initializer_list<std::pair<int, char>> chars) {
+    position = posAndState.first;
+    currState = posAndState.second;
+    for (auto &p : chars) {
+        tape.setChar(p.first, p.second);
+    }
+}
 TuringState::~TuringState() {}
 
 // Turing machine section
 
 TuringMachine::TuringMachine() {}
+TuringMachine::TuringMachine(
+    std::initializer_list<std::pair<std::pair<int, char>, TuringTurn>> turns) {
+    for(auto &p : turns){
+        addTurn(p.first, p.second);
+    }
+}
 TuringMachine::~TuringMachine() {}
 
 void TuringMachine::loadState(TuringState newState) { state = newState; }
@@ -95,7 +109,7 @@ std::string TuringMachine::getStrView(int from, int to) {
     return out;
 }
 
-int TuringMachine::getCurPosition(void){ return state.position; }
+int TuringMachine::getCurPosition(void) { return state.position; }
 int TuringMachine::getCurState(void) { return state.currState; }
 bool TuringMachine::isDone(void) { return stop; }
 void TuringMachine::clear(void) { stop = false; }
