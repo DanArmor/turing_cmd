@@ -26,16 +26,16 @@ int main() {
         {{{0, '0'}, {0, '1', Right}}, {{0, '_'}, {-1, '_', NoMove}}}};
 
     // Alph and comment
-    std::string alphStr = "";
-    std::string commentStr = "";
+    std::string alphStr = "01_";
+    std::string commentStr = "Базовый комментарий";
     auto alphInput = Input(&alphStr, "");
     auto commentInput = Input(&commentStr, "");
 
     control.loadState(state);
     
     // TABLE
-    std::vector<std::vector<std::string>> table_strs;
-    std::vector<std::vector<Component>> table_inputs;
+//    std::vector<std::vector<std::string>> table_strs;
+//    std::vector<std::vector<Component>> table_inputs;
 
     // CELLS
     std::vector<Component> cells;
@@ -101,6 +101,40 @@ int main() {
             cells_strs[i] = tape.getChar(i);
         }
     };
+    auto drawTableUI = [&]() {
+        auto tableMap = control.getTable();
+        std::set<int> setCols;
+        for(auto transaction : tableMap){
+            setCols.insert(transaction.first.first);
+        }
+        int cols = setCols.size();
+
+        std::vector<std::vector<std::string>> table;
+        for(int i = 0; i < alphStr.size(); i++){
+            table.push_back({});
+            table[i].push_back("");
+            table[i][0].push_back(alphStr[i]);
+            for(int j = 0; j < cols; j++){
+                if(tableMap.count(std::make_pair(j, alphStr[i])) != 0){
+                    TuringTurn turn = tableMap[std::make_pair(j, alphStr[i])];
+                    std::string newStateStr = turn.newState == -1 ? "_END" : ("_" + std::to_string(turn.newState));
+                    table[i].push_back("Q" + newStateStr + " " + pickDirectStr(turn.direction)
+                    + " " + std::to_string(turn.newSymbol));
+                } else{
+                    table[i].push_back("None");
+                }
+            }
+        }
+
+        auto tt = Table(table);
+        for(int i = 0; i < alphStr.size(); i++){
+            tt.SelectRow(i).SeparatorVertical(LIGHT);
+            for(int j = 0; j < cols; j++){
+            }
+        }
+        tt.SelectAll().Border(LIGHT);
+        return tt.Render();
+    };
 
     createCells();
     setStartTapeUI();
@@ -138,7 +172,8 @@ int main() {
                                commentInput->Render()}),
                          separator()
                          ) | flex,
-                     separator()
+                     separator(),
+                     drawTableUI()
                   }) |
                border | flex;
     });

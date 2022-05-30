@@ -75,6 +75,7 @@ class TuringMachine {
 
     int getCurState(void);
     int getCurPosition(void);
+    std::map<std::pair<int, char>, TuringTurn> getTable(void);
 
     bool isDone(void);
     void clear(void);
@@ -86,5 +87,7 @@ class TuringMachine {
     std::string comment;
     TuringState state;
 };
+
+std::string pickDirectStr(TuringDirection direction);
 
 #endif
