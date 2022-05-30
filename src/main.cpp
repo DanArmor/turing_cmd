@@ -127,9 +127,10 @@ int main() {
         }
 
         auto tt = Table(table);
-        for(int i = 0; i < alphStr.size(); i++){
+        for(int i = 0; i < table.size(); i++){
             tt.SelectRow(i).SeparatorVertical(LIGHT);
-            for(int j = 0; j < cols; j++){
+            for(int j = 0; j < table[0].size(); j++){
+                tt.SelectColumn(j).SeparatorHorizontal(HEAVY);
             }
         }
         tt.SelectAll().Border(LIGHT);
