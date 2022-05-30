@@ -98,6 +98,8 @@ void TuringMachine::makeTurn(void) {
     }
 }
 
+TuringTape TuringMachine::getTape(void){ return state.tape; }
+
 std::map<int, char> TuringMachine::getTapeMap(void) {
     return state.tape.getTapeMap();
 }

@@ -71,6 +71,7 @@ class TuringMachine {
     char getCurChar(void);
     std::map<int, char> getTapeMap(void);
     std::string getStrView(int from, int to);
+    TuringTape getTape(void);
 
     int getCurState(void);
     int getCurPosition(void);

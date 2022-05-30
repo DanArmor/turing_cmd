@@ -8,6 +8,7 @@
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/dom/elements.hpp"
+#include "ftxui/dom/table.hpp"
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/screen/string.hpp"
 #include "ftxui/util/ref.hpp"
@@ -23,10 +24,18 @@ int main() {
 
     TuringMachine control{
         {{{0, '0'}, {0, '1', Right}}, {{0, '_'}, {-1, '_', NoMove}}}};
-    control.setAlph("01_");
-    control.setComment("Комментарий");
+
+    // Alph and comment
+    std::string alphStr = "";
+    std::string commentStr = "";
+    auto alphInput = Input(&alphStr, "");
+    auto commentInput = Input(&commentStr, "");
 
     control.loadState(state);
+    
+    // TABLE
+    std::vector<std::vector<std::string>> table_strs;
+    std::vector<std::vector<Component>> table_inputs;
 
     // CELLS
     std::vector<Component> cells;
@@ -50,24 +59,87 @@ int main() {
         // return hbox(cells_final);
     };
 
-    auto getFinal = [&]() {
+    // Cells funcs
+    auto colorCell = [&](int i) {
+        if(i == control.getCurPosition()){
+            return cells[i]->Render() | bgcolor(Color::Blue);
+        } else{
+            return cells[i]->Render();
+        }
+    };
+    auto getFinalCells = [&]() {
         for (int i = 0; i < sizeCells; i++) {
             cells_vbox[i] =
-                vbox({cells_numbers[i], separator(), cells[i]->Render()})  |
+                vbox({cells_numbers[i], separator(), colorCell(i)}) |
                 size(WIDTH, Constraint::GREATER_THAN, 3);
             cells_final[i] = hbox(cells_vbox[i], separator());
         }
         return cells_final;
     };
 
+    // Some update funcs
+    auto setStartTapeUI = [&]() {
+        for (int i = 0; i < sizeCells; i++) {
+            cells_strs[i] = state.tape.getChar(i);
+        }
+    };
+    auto updateMachine = [&]() {
+        control.setAlph(alphStr);
+        control.setComment(commentStr);
+    };
+    auto stepButtonAction = [&]() {
+        updateMachine();
+        control.makeTurn();
+    };
+    auto runButtonAction = [&]() {
+        updateMachine();
+        control.makeTurn();
+    };
+    auto updateTapeUI = [&]() {
+        TuringTape tape = control.getTape();
+        for (int i = 0; i < sizeCells; i++) {
+            cells_strs[i] = tape.getChar(i);
+        }
+    };
+
     createCells();
+    setStartTapeUI();
 
     // UI
 
+    // Buttons
+    auto stepButton = Button("Step", stepButtonAction);
+    auto runButton = Button("Run", runButtonAction);
+
     auto cellsComponent = Container::Horizontal(cells);
-    auto mainComponent = Container::Vertical({cellsComponent});
+    auto mainComponent = Container::Vertical({
+        cellsComponent,
+        stepButton,
+        runButton,
+        alphInput,
+        commentInput
+    });
     auto renderer = Renderer(mainComponent, [&] {
-        return vbox({text("Машина Тьюринга"), separator(), hbox(getFinal())}) |
+        updateTapeUI();
+        return vbox({text("Машина Тьюринга"),
+                     separator(),
+                     hbox(getFinalCells()), separator(),
+                     hbox(
+                         stepButton->Render() | size(WIDTH, EQUAL, 10) | color(Color::SkyBlue1),
+                         separator(),
+                         runButton->Render() | size(WIDTH, EQUAL, 10) | color(Color::SkyBlue1),
+                         separator(),
+                         vbox({text("Алфавит"), 
+                               separator(),
+                               alphInput->Render()}),
+                         separator(),
+                         vbox({text("Комментарий"), 
+                               separator(),
+                               commentInput->Render()}),
+                         separator()
+                         ) | flex,
+                     separator()
+                  }) |
                border | flex;
     });
 
