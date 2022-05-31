@@ -34,8 +34,8 @@ int main() {
     control.loadState(state);
     
     // TABLE
-//    std::vector<std::vector<std::string>> table_strs;
-//    std::vector<std::vector<Component>> table_inputs;
+    std::vector<std::vector<std::string>> table_strs;
+    std::vector<std::vector<Component>> table_inputs;
 
     // CELLS
     std::vector<Component> cells;
@@ -137,6 +137,9 @@ int main() {
         return tt.Render();
     };
 
+    
+
+
     createCells();
     setStartTapeUI();
 
@@ -147,13 +150,15 @@ int main() {
     auto runButton = Button("Run", runButtonAction);
 
     auto cellsComponent = Container::Horizontal(cells);
+    auto tableComponent = Container::Horizontal({});
     auto mainComponent = Container::Vertical({
         cellsComponent,
         stepButton,
         runButton,
         alphInput,
-        commentInput
+        commentInput,
     });
+    
     auto renderer = Renderer(mainComponent, [&] {
         updateTapeUI();
         return vbox({text("Машина Тьюринга"),
