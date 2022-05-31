@@ -16,14 +16,49 @@
 
 using namespace ftxui;
 
+Component stateTableUI(std::string alph) {
+    class Impl : public ComponentBase {
+       public:
+        Impl(std::string alph) {
+            alph_ = alph;
+            expendButton = Button("Add", [&]{
+                return;
+            });
+            removeButton = Button("Remove", [&]{
+                return;
+            });
+        }
+        ~Impl() {}
+
+       private:
+        Component expendButton;
+        Component removeButton;
+        Component rows = Container::Vertical({});
+        std::string alph_;
+        Element Render() override {
+            std::vector<Element> rows;
+            for(auto c : alph_){
+                std::string s{c};
+                std::vector<Element> row;
+                row.push_back(text(s));
+                row.push_back(text(s)); // Test 
+                row.push_back(expendButton->Render() | bgcolor(Color::Green));
+                row.push_back(removeButton->Render() | bgcolor(Color::Red));
+                rows.push_back(hbox(row));
+            }
+            return vbox(rows);
+        }
+    };
+    return Make<Impl>(alph);
+}
+
 const int sizeCells = 20;
 
 int main() {
     TuringState state{{0, 0},
                       {{0, '0'}, {1, '0'}, {2, '0'}, {3, '_'}, {4, '_'}}};
 
-    TuringMachine control{
-        {{{0, '0'}, {0, '1', Right}}, {{0, '_'}, {-1, '_', NoMove}}}};
+    TuringMachine control;
 
     // Alph and comment
     std::string alphStr = "01_";
@@ -32,7 +67,7 @@ int main() {
     auto commentInput = Input(&commentStr, "");
 
     control.loadState(state);
-    
+
     // TABLE
     std::vector<std::vector<std::string>> table_strs;
     std::vector<std::vector<Component>> table_inputs;
@@ -61,9 +96,9 @@ int main() {
 
     // Cells funcs
     auto colorCell = [&](int i) {
-        if(i == control.getCurPosition()){
+        if (i == control.getCurPosition()) {
             return cells[i]->Render() | bgcolor(Color::Blue);
-        } else{
+        } else {
             return cells[i]->Render();
         }
     };
@@ -101,44 +136,6 @@ int main() {
             cells_strs[i] = tape.getChar(i);
         }
     };
-    auto drawTableUI = [&]() {
-        auto tableMap = control.getTable();
-        std::set<int> setCols;
-        for(auto transaction : tableMap){
-            setCols.insert(transaction.first.first);
-        }
-        int cols = setCols.size();
-
-        std::vector<std::vector<std::string>> table;
-        for(int i = 0; i < alphStr.size(); i++){
-            table.push_back({});
-            table[i].push_back("");
-            table[i][0].push_back(alphStr[i]);
-            for(int j = 0; j < cols; j++){
-                if(tableMap.count(std::make_pair(j, alphStr[i])) != 0){
-                    TuringTurn turn = tableMap[std::make_pair(j, alphStr[i])];
-                    std::string newStateStr = turn.newState == -1 ? "_END" : ("_" + std::to_string(turn.newState));
-                    table[i].push_back("Q" + newStateStr + " " + pickDirectStr(turn.direction)
-                    + " " + std::to_string(turn.newSymbol));
-                } else{
-                    table[i].push_back("None");
-                }
-            }
-        }
-
-        auto tt = Table(table);
-        for(int i = 0; i < table.size(); i++){
-            tt.SelectRow(i).SeparatorVertical(LIGHT);
-            for(int j = 0; j < table[0].size(); j++){
-                tt.SelectColumn(j).SeparatorHorizontal(HEAVY);
-            }
-        }
-        tt.SelectAll().Border(LIGHT);
-        return tt.Render();
-    };
-
-    
-
 
     createCells();
     setStartTapeUI();
@@ -150,37 +147,40 @@ int main() {
     auto runButton = Button("Run", runButtonAction);
 
     auto cellsComponent = Container::Horizontal(cells);
-    auto tableComponent = Container::Horizontal({});
-    auto mainComponent = Container::Vertical({
-        cellsComponent,
-        stepButton,
-        runButton,
-        alphInput,
-        commentInput,
-    });
-    
+    auto tableComponent = stateTableUI(alphStr);
+    auto mainComponent =
+        Container::Vertical({cellsComponent, stepButton, runButton, alphInput,
+                             commentInput, tableComponent});
+    std::vector<std::string> testS{"1", "2", "3", "4"};
+    auto drawTableUI = [&]() {
+        auto t =
+            Container::Horizontal({Input(&testS[0], ""), Input(&testS[1], "")});
+        auto tt =
+            Container::Horizontal({Input(&testS[2], ""), Input(&testS[3], "")});
+        tableComponent->Add(t);
+        tableComponent->Add(tt);
+    };
+    drawTableUI();
+
     auto renderer = Renderer(mainComponent, [&] {
         updateTapeUI();
-        return vbox({text("Машина Тьюринга"),
-                     separator(),
+        return vbox({text("Машина Тьюринга"), separator(),
                      hbox(getFinalCells()), separator(),
-                     hbox(
-                         stepButton->Render() | size(WIDTH, EQUAL, 10) | color(Color::SkyBlue1),
-                         separator(),
-                         runButton->Render() | size(WIDTH, EQUAL, 10) | color(Color::SkyBlue1),
-                         separator(),
-                         vbox({text("Алфавит"), 
-                               separator(),
-                               alphInput->Render()}),
-                         separator(),
-                         vbox({text("Комментарий"), 
-                               separator(),
-                               commentInput->Render()}),
-                         separator()
-                         ) | flex,
+                     hbox(stepButton->Render() | size(WIDTH, EQUAL, 10) |
+                              color(Color::SkyBlue1),
+                          separator(),
+                          runButton->Render() | size(WIDTH, EQUAL, 10) |
+                              color(Color::SkyBlue1),
+                          separator(),
+                          vbox({text("Алфавит"), separator(),
+                                alphInput->Render()}),
+                          separator(),
+                          vbox({text("Комментарий"), separator(),
+                                commentInput->Render()}),
+                          separator()) |
+                         flex,
                      separator(),
-                     drawTableUI()
-                  }) |
+                     tableComponent->Render()}) |
                border | flex;
     });
 

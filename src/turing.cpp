@@ -54,7 +54,7 @@ TuringState::~TuringState() {}
 TuringMachine::TuringMachine() {}
 TuringMachine::TuringMachine(
     std::initializer_list<std::pair<std::pair<int, char>, TuringTurn>> turns) {
-    for(auto &p : turns){
+    for (auto &p : turns) {
         addTurn(p.first, p.second);
     }
 }
@@ -98,11 +98,8 @@ void TuringMachine::makeTurn(void) {
     }
 }
 
-TuringTape TuringMachine::getTape(void){ return state.tape; }
+TuringTape TuringMachine::getTape(void) { return state.tape; }
 
-std::map<int, char> TuringMachine::getTapeMap(void) {
-    return state.tape.getTapeMap();
-}
 std::string TuringMachine::getStrView(int from, int to) {
     std::string out;
     for (int i = from; i <= to; i++) {
@@ -111,7 +108,7 @@ std::string TuringMachine::getStrView(int from, int to) {
     return out;
 }
 
-std::map<std::pair<int, char>, TuringTurn> TuringMachine::getTable(void){
+std::map<std::pair<int, char>, TuringTurn> &TuringMachine::getTable(void) {
     return table;
 }
 
@@ -120,8 +117,8 @@ int TuringMachine::getCurState(void) { return state.currState; }
 bool TuringMachine::isDone(void) { return stop; }
 void TuringMachine::clear(void) { stop = false; }
 
-std::string pickDirectStr(TuringDirection direction){
-    switch(direction){
+std::string pickDirectStr(TuringDirection direction) {
+    switch (direction) {
         case TuringDirection::Left:
             return "←";
         case TuringDirection::Right:
