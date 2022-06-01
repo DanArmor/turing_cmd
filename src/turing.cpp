@@ -34,6 +34,10 @@ char TuringTape::getChar(int pos) {
     }
 }
 
+void TuringTape::clear(void){
+    tape.clear();
+}
+
 std::map<int, char> TuringTape::getTapeMap(void) { return tape; }
 
 // Turing state section

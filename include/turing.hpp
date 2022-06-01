@@ -33,6 +33,7 @@ class TuringTape {
 
     void setChar(int pos, char c);
     char getChar(int pos);
+    void clear(void);
 
     std::map<int, char> getTapeMap(void);
 
