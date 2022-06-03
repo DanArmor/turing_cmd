@@ -11,7 +11,8 @@
 
 enum TuringDirection { Left, Right, NoMove };
 
-const wchar_t TURING_EMPTY = L'$';
+const wchar_t TURING_EMPTY = L'λ';
+const std::wstring TURING_EMPTY_STR{TURING_EMPTY};
 
 struct TuringTurn {
     TuringTurn();

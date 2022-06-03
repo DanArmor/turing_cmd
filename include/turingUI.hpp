@@ -25,6 +25,8 @@ class TuringTapeUI : public ftxui::ComponentBase{
     private:
     int size;
     int leftIndex;
+    int CELL_SIZE = 5;
+    int positionAbsolute = 0;
     std::vector<std::wstring> tapeStrs;
     std::vector<ftxui::Component> tapeInputs;
 

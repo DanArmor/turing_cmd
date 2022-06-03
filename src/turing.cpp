@@ -129,5 +129,7 @@ std::wstring pickDirectStr(TuringDirection direction) {
             return L"→";
         case TuringDirection::NoMove:
             return L"↓";
+        default:
+            throw(std::invalid_argument("Неизвестное направление"));
     }
 }
