@@ -38,6 +38,10 @@ void TuringTapeUI::setChar(wchar_t c, int pos){
     tapeStrs[pos] = c;
 }
 
+void TuringTapeUI::setPositionAbsolute(int pos){
+    positionAbsolute = pos;
+}
+
 ftxui::Element TuringTapeUI::Render(){
     std::vector<ftxui::Element> cells;
     auto tapeCursor = [this, &cells](int x, auto elem){
@@ -71,6 +75,9 @@ bool TuringTapeUI::OnEvent(ftxui::Event event){
 TuringUI::TuringUI(std::function<void()> quitFunc) {
     quit = quitFunc;
 
+    moveTapeLeftButton = ftxui::Button("←Move", [&](){});
+    moveTapeRightButton = ftxui::Button("Move➔", [&](){});
+
     stepButton = ftxui::Button("Step", [&]() {});
     runButton = ftxui::Button("Run", [&]() {});
     alphInput = ftxui::Input(&alphStr, "");
@@ -79,13 +86,13 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
     addButton = ftxui::Button("Add", [&]() {});
     removeButton = ftxui::Button("Remove", [&]() {});
 
-    tapeComponent = ftxui::Make<TuringTapeUI>(21);
+    tapeComponent = ftxui::Make<TuringTapeUI>(25);
     tableComponent = ftxui::Make<TuringTableUI>();
 
     Add(
         ftxui::Container::Vertical(
             {
-                tapeComponent,
+                ftxui::Container::Horizontal({moveTapeLeftButton, tapeComponent, moveTapeRightButton}),
                 ftxui::Container::Horizontal({stepButton, runButton, alphInput, commentInput}),
                 ftxui::Container::Horizontal({addButton, removeButton}),
                 tableComponent
@@ -95,11 +102,18 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
 }
 
 ftxui::Element TuringUI::Render(){
-    auto buttonsTape = ftxui::hbox({
+    
+    auto tapeAndButtons = ftxui::hbox({
+        moveTapeLeftButton->Render() | ftxui::color(ftxui::Color::DarkOrange),
+        tapeComponent->Render(),
+        moveTapeRightButton->Render() | ftxui::color(ftxui::Color::DarkOrange)
+    });
+
+    auto mainControl = ftxui::hbox({
         stepButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
         runButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
-        alphInput->Render(),
-        commentInput->Render()
+        ftxui::vbox({ftxui::text(L"Алфавит"), ftxui::separatorLight(), alphInput->Render()}) | ftxui::borderLight,
+        ftxui::vbox({ftxui::text(L"Комментарий"), ftxui::separatorLight(), commentInput->Render()}) | ftxui::borderLight
     });
 
     auto buttonsTable = ftxui::hbox({
@@ -108,10 +122,10 @@ ftxui::Element TuringUI::Render(){
     });
 
     auto mainBox = ftxui::vbox({
-        ftxui::text(L"Машина Тьюринга"),
+        ftxui::text(L"Машина Тьюринга") | ftxui::bold,
         ftxui::separatorHeavy(),
-        tapeComponent->Render(),
-        buttonsTape,
+        tapeAndButtons,
+        mainControl,
         buttonsTable,
         tableComponent->Render()
     }) | ftxui::border;

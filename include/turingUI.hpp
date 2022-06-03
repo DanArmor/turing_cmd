@@ -37,6 +37,7 @@ class TuringTapeUI : public ftxui::ComponentBase{
     TuringTapeUI(int size_);
 
     void setChar(wchar_t c, int pos);
+    void setPositionAbsolute(int pos);
 
     ftxui::Element Render() override;
     bool OnEvent(ftxui::Event) override;
@@ -50,6 +51,9 @@ class TuringUI : public ftxui::ComponentBase {
 
     bool isRunning = false;
     std::wstring alphStr, commentStr;
+
+    ftxui::Component moveTapeLeftButton;
+    ftxui::Component moveTapeRightButton;
 
     ftxui::Component stepButton;
     ftxui::Component runButton;
