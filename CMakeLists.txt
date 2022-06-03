@@ -22,6 +22,9 @@ include_directories(include)
 #include_directories(${ftxui_SOURCE_DIR}/include)
 
 add_library(TuringLib src/turing.cpp)
+add_library(TuringUI src/turingUI.cpp)
+target_link_libraries(TuringUI PRIVATE ftxui::screen ftxui::dom ftxui::component TuringLib)
+
 add_executable(MAIN src/main.cpp)
 
-target_link_libraries(MAIN PRIVATE ftxui::screen ftxui::dom ftxui::component TuringLib)
+target_link_libraries(MAIN PRIVATE ftxui::screen ftxui::dom ftxui::component TuringLib TuringUI)
