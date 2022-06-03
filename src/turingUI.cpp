@@ -53,6 +53,17 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
 
     tapeComponent = ftxui::Make<TuringTapeUI>(20);
     tableComponent = ftxui::Make<TuringTableUI>();
+
+    Add(
+        ftxui::Container::Vertical(
+            {
+                tapeComponent,
+                ftxui::Container::Horizontal({stepButton, runButton, alphInput, commentInput}),
+                ftxui::Container::Horizontal({addButton, removeButton}),
+                tableComponent
+            }
+        )
+    );
 }
 
 ftxui::Element TuringUI::Render(){
@@ -73,15 +84,18 @@ ftxui::Element TuringUI::Render(){
         ftxui::separatorHeavy(),
         tableComponent->Render(),
         buttonsTape,
-        buttonsTable
+        buttonsTable,
+        tableComponent->Render()
     }) | ftxui::border;
 
     return mainBox;
 }
 
 bool TuringUI::OnEvent(ftxui::Event event){
-    if(event == ftxui::Event::Character(L'q') || event == ftxui::Event::Escape){
+    if(event == ftxui::Event::Escape){
         quit();
+        return true;
     }
-    return false;
+
+    return ChildAt(0)->OnEvent(event);
 }
