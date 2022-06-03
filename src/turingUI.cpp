@@ -4,11 +4,37 @@
 TuringTableUI::TuringTableUI() {}
 
 ftxui::Element TuringTableUI::Render(){
-    return ftxui::hbox({});
+    std::vector<ftxui::Element> alphElems;
+    alphElems.push_back(ftxui::separatorHeavy());
+    for(int i = 0; i < alph.size(); i++){
+        alphElems.push_back(
+            ftxui::text(std::wstring({alph[i]}))
+        );
+        alphElems.push_back(ftxui::separatorHeavy());
+    }
+    return ftxui::vbox({alphElems});
 }
 
 bool TuringTableUI::OnEvent(ftxui::Event event){
-    return false;
+    return false;//ChildAt(0)->OnEvent(event);
+}
+
+void TuringTableUI::removeRow(void){
+
+}
+void TuringTableUI::removeCol(void){
+
+}
+
+void TuringTableUI::addRow(wchar_t c){
+
+}
+void TuringTableUI::addCol(void){
+
+}
+
+void TuringTableUI::updateTable(std::wstring alph_){
+    alph = alph_;
 }
 
 // TAPE UI
@@ -19,7 +45,6 @@ TuringTapeUI::TuringTapeUI(int size_) {
     for(int i = 0; i < size; i++){
         tapeInputs.push_back(ftxui::Input(&tapeStrs[i], &TURING_EMPTY_STR));
     }
-
     Add(ftxui::Container::Horizontal(tapeInputs));
 }
 
@@ -78,10 +103,14 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
     moveTapeLeftButton = ftxui::Button("←Move", [&](){});
     moveTapeRightButton = ftxui::Button("Move➔", [&](){});
 
+    ftxui::InputOption alphInputOption;
+    alphInputOption.on_change = [this](void)->void{
+                                    this->needToUpdateTable = true;
+                                };
     stepButton = ftxui::Button("Step", [&]() {});
     runButton = ftxui::Button("Run", [&]() {});
-    alphInput = ftxui::Input(&alphStr, "");
-    commentInput = ftxui::Input(&commentStr, "");
+    alphInput = ftxui::Input(&alphStr, L"", alphInputOption);
+    commentInput = ftxui::Input(&commentStr, L"");
 
     addButton = ftxui::Button("Add", [&]() {});
     removeButton = ftxui::Button("Remove", [&]() {});
@@ -138,6 +167,13 @@ bool TuringUI::OnEvent(ftxui::Event event){
         quit();
         return true;
     }
+    
+    bool answer = ChildAt(0)->OnEvent(event);
 
-    return ChildAt(0)->OnEvent(event);
+    if(needToUpdateTable){
+        needToUpdateTable = false;
+        this->tableComponent->updateTable(alphStr);
+    }
+
+    return answer;
 }

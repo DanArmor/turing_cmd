@@ -10,19 +10,33 @@
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/screen/string.hpp"
 #include "ftxui/util/ref.hpp"
-
 #include "turing.hpp"
 
-class TuringTableUI : public ftxui::ComponentBase{
-    private:
-    public:
+class TuringTableUI : public ftxui::ComponentBase {
+   private:
+    std::wstring alph;
+
+    std::vector<std::vector<std::wstring>> tableStrs;
+    std::vector<std::vector<ftxui::Component>> tableInputs;
+
+    void removeRow(void);
+    void removeCol(void);
+
+
+   public:
     TuringTableUI();
+
+    void addRow(wchar_t c);
+    void addCol(void);
+
+    void updateTable(std::wstring alph_);
+
     ftxui::Element Render() override;
     bool OnEvent(ftxui::Event) override;
 };
 
-class TuringTapeUI : public ftxui::ComponentBase{
-    private:
+class TuringTapeUI : public ftxui::ComponentBase {
+   private:
     int size;
     int leftIndex;
     int CELL_SIZE = 5;
@@ -32,8 +46,8 @@ class TuringTapeUI : public ftxui::ComponentBase{
 
     int toLocalPos(int pos);
     bool isValidPos(int pos);
-    
-    public:
+
+   public:
     TuringTapeUI(int size_);
 
     void setChar(wchar_t c, int pos);
@@ -50,6 +64,7 @@ class TuringUI : public ftxui::ComponentBase {
     TuringMachine machine;
 
     bool isRunning = false;
+    bool needToUpdateTable = false;
     std::wstring alphStr, commentStr;
 
     ftxui::Component moveTapeLeftButton;
