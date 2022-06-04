@@ -22,12 +22,15 @@ class TuringRowUI : public ftxui::ComponentBase {
 
     void addCol();
     void removeCol();
+
+    ftxui::Element Render() override;
+    bool OnEvent(ftxui::Event) override;
 };
 
 class TuringTableUI : public ftxui::ComponentBase {
    private:
     std::wstring alph;
-    std::vector<ftxui::Component> rowsComponents;
+    std::vector<std::shared_ptr<TuringRowUI>> rowsComponents;
 
     int cols(void);
     int rows(void);

@@ -2,17 +2,26 @@
 
 // ROW UI
 
-TuringRowUI::TuringRowUI() { Add(ftxui::Container::Horizontal(inputs)); }
+TuringRowUI::TuringRowUI() { Add(ftxui::Container::Horizontal({})); }
 
 void TuringRowUI::addCol(){
-
+    strs.push_back(L"");
+    inputs.push_back(ftxui::Input(strs.back(), L""));
+    ChildAt(0)->Add(inputs.back());
 }
 void TuringRowUI::removeCol(){
-
+    strs.pop_back();
+    ChildAt(0)->ChildAt(ChildAt(0)->ChildCount()-1)->Detach();
+    inputs.pop_back();
 }
 
 ftxui::Element TuringRowUI::Render(){
-    return ftxui::hbox({});
+    std::vector<ftxui::Element> elems;
+    for(int i = 0; i < strs.size(); i++){
+        elems.push_back(inputs[i]->Render());
+        elems.push_back(ftxui::separator());
+    }
+    return ftxui::hbox(elems) | ftxui::border;
 }
 
 bool TuringRowUI::OnEvent(ftxui::Event event){
@@ -21,10 +30,16 @@ bool TuringRowUI::OnEvent(ftxui::Event event){
 
 // TABLE UI
 TuringTableUI::TuringTableUI() {
-    Add(ftxui::Container::Vertical(rowsComponents));
+    Add(ftxui::Container::Vertical({}));
 }
 
-ftxui::Element TuringTableUI::Render() { return ftxui::vbox({}); }
+ftxui::Element TuringTableUI::Render() {
+    std::vector<ftxui::Element> elems;
+    for(int i = 0; i < rowsComponents.size(); i++){
+        elems.push_back(rowsComponents[i]->Render());
+    }
+    return ftxui::vbox(elems);
+}
 
 bool TuringTableUI::OnEvent(ftxui::Event event) {
     return ChildAt(0)->OnEvent(event);
@@ -37,11 +52,25 @@ int TuringTableUI::rows(void) { return rowsComponents.size(); }
 void TuringTableUI::removeRow(void) {}
 void TuringTableUI::removeCol(void) {}
 
-void TuringTableUI::addRow(wchar_t c) {}
+void TuringTableUI::addRow(wchar_t c) {
+    rowsComponents.push_back(ftxui::Make<TuringRowUI>());
+    ChildAt(0)->Add(rowsComponents.back());
+}
 
-void TuringTableUI::addCol(void) {}
+void TuringTableUI::addCol(void) {
+    for(int i = 0; i < rowsComponents.size(); i++){
+        rowsComponents[i]->addCol();
+    }
+}
 
-void TuringTableUI::updateTable(std::wstring alph_) { alph = alph_; }
+void TuringTableUI::updateTable(std::wstring alph_){
+    ChildAt(0)->DetachAllChildren();
+    rowsComponents.clear();
+    for(int i = 0; i < alph_.size(); i++){
+        addRow(alph_[i]);
+    }
+    alph = alph_;
+}
 
 // TAPE UI
 TuringTapeUI::TuringTapeUI(int size_) {
@@ -49,7 +78,7 @@ TuringTapeUI::TuringTapeUI(int size_) {
     leftIndex = -(size_ / 2);
     tapeStrs.resize(size);
     for (int i = 0; i < size; i++) {
-        tapeInputs.push_back(ftxui::Input(&tapeStrs[i], &TURING_EMPTY_STR));
+        tapeInputs.push_back(ftxui::Input(tapeStrs[i], &TURING_EMPTY_STR));
     }
     Add(ftxui::Container::Horizontal(tapeInputs));
 }
