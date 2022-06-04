@@ -12,19 +12,31 @@
 #include "ftxui/util/ref.hpp"
 #include "turing.hpp"
 
+class TuringRowUI : public ftxui::ComponentBase {
+   private:
+    std::vector<std::wstring> strs;
+    std::vector<ftxui::Component> inputs;
+
+   public:
+    TuringRowUI();
+
+    void addCol();
+    void removeCol();
+};
+
 class TuringTableUI : public ftxui::ComponentBase {
    private:
     std::wstring alph;
+    std::vector<ftxui::Component> rowsComponents;
 
-    std::vector<std::vector<std::wstring>> tableStrs;
-    std::vector<std::vector<ftxui::Component>> tableInputs;
-
-    void removeRow(void);
-    void removeCol(void);
-
+    int cols(void);
+    int rows(void);
 
    public:
     TuringTableUI();
+
+    void removeRow(void);
+    void removeCol(void);
 
     void addRow(wchar_t c);
     void addCol(void);
