@@ -16,9 +16,11 @@ class TuringRowUI : public ftxui::ComponentBase {
    private:
     std::vector<std::wstring> strs;
     std::vector<ftxui::Component> inputs;
+    bool isTop = false;
 
    public:
     TuringRowUI();
+    TuringRowUI(bool isTop_);
 
     void addCol();
     void removeCol();
@@ -41,7 +43,7 @@ class TuringTableUI : public ftxui::ComponentBase {
     void removeRow(void);
     void removeCol(void);
 
-    void addRow(wchar_t c);
+    void addRow(wchar_t c, bool isTop_);
     void addCol(void);
 
     void updateTable(std::wstring alph_);
@@ -82,11 +84,14 @@ class TuringUI : public ftxui::ComponentBase {
     bool needToUpdateTable = false;
     std::wstring alphStr, commentStr;
 
+    ftxui::Component helpButton;
+
     ftxui::Component moveTapeLeftButton;
     ftxui::Component moveTapeRightButton;
 
     ftxui::Component stepButton;
     ftxui::Component runButton;
+    ftxui::Component resetButton;
     ftxui::Component alphInput;
     ftxui::Component commentInput;
 

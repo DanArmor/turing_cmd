@@ -3,6 +3,7 @@
 // ROW UI
 
 TuringRowUI::TuringRowUI() { Add(ftxui::Container::Horizontal({})); }
+TuringRowUI::TuringRowUI(bool isTop_) : isTop(isTop_) { Add(ftxui::Container::Horizontal({})); }
 
 void TuringRowUI::addCol(){
     strs.push_back(L"");
@@ -10,15 +11,23 @@ void TuringRowUI::addCol(){
     ChildAt(0)->Add(inputs.back());
 }
 void TuringRowUI::removeCol(){
-    strs.pop_back();
-    ChildAt(0)->ChildAt(ChildAt(0)->ChildCount()-1)->Detach();
-    inputs.pop_back();
+    if(strs.size() != 0){
+        strs.pop_back();
+        ChildAt(0)->ChildAt(ChildAt(0)->ChildCount()-1)->Detach();
+        inputs.pop_back();
+    }
 }
 
 ftxui::Element TuringRowUI::Render(){
     std::vector<ftxui::Element> elems;
     for(int i = 0; i < strs.size(); i++){
-        elems.push_back(inputs[i]->Render());
+        if(isTop)
+            elems.push_back(ftxui::vbox({
+                ftxui::text(L"Q" + std::to_wstring(i)),
+                ftxui::separator(),
+                inputs[i]->Render() | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 5)}));
+        else
+            elems.push_back(inputs[i]->Render() | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 5));
         elems.push_back(ftxui::separator());
     }
     return ftxui::hbox(elems) | ftxui::border;
@@ -36,7 +45,9 @@ TuringTableUI::TuringTableUI() {
 ftxui::Element TuringTableUI::Render() {
     std::vector<ftxui::Element> elems;
     for(int i = 0; i < rowsComponents.size(); i++){
-        elems.push_back(rowsComponents[i]->Render());
+        elems.push_back(ftxui::hbox({
+            ftxui::text(std::wstring{alph[i]}), rowsComponents[i]->Render()
+        }));
     }
     return ftxui::vbox(elems);
 }
@@ -50,10 +61,15 @@ int TuringTableUI::cols(void) { return 0; }
 int TuringTableUI::rows(void) { return rowsComponents.size(); }
 
 void TuringTableUI::removeRow(void) {}
-void TuringTableUI::removeCol(void) {}
 
-void TuringTableUI::addRow(wchar_t c) {
-    rowsComponents.push_back(ftxui::Make<TuringRowUI>());
+void TuringTableUI::removeCol(void) {
+    for(int i = 0; i < rowsComponents.size(); i++){
+        rowsComponents[i]->removeCol();
+    }
+}
+
+void TuringTableUI::addRow(wchar_t c, bool isTop_) {
+    rowsComponents.push_back(ftxui::Make<TuringRowUI>(isTop_));
     ChildAt(0)->Add(rowsComponents.back());
 }
 
@@ -67,7 +83,7 @@ void TuringTableUI::updateTable(std::wstring alph_){
     ChildAt(0)->DetachAllChildren();
     rowsComponents.clear();
     for(int i = 0; i < alph_.size(); i++){
-        addRow(alph_[i]);
+        addRow(alph_[i], i == 0);
     }
     alph = alph_;
 }
@@ -130,11 +146,14 @@ bool TuringTapeUI::OnEvent(ftxui::Event event) {
 TuringUI::TuringUI(std::function<void()> quitFunc) {
     quit = quitFunc;
 
+    helpButton = ftxui::Button("Help", [&](){});
+    
     moveTapeLeftButton = ftxui::Button("←Move", [&]() {});
     moveTapeRightButton = ftxui::Button("Move➔", [&]() {});
 
     stepButton = ftxui::Button("Step", [&]() {});
     runButton = ftxui::Button("Run", [&]() {});
+    resetButton = ftxui::Button("Reset", [&](){});
 
     ftxui::InputOption alphInputOption;
     alphInputOption.on_change = [this](void) {
@@ -151,10 +170,11 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
     tableComponent = ftxui::Make<TuringTableUI>();
 
     Add(ftxui::Container::Vertical(
-        {ftxui::Container::Horizontal(
+        {helpButton,
+         ftxui::Container::Horizontal(
              {moveTapeLeftButton, tapeComponent, moveTapeRightButton}),
          ftxui::Container::Horizontal(
-             {stepButton, runButton, alphInput, commentInput}),
+             {stepButton, runButton, resetButton, alphInput, commentInput}),
          ftxui::Container::Horizontal({addButton, removeButton}),
          tableComponent}));
 }
@@ -169,6 +189,7 @@ ftxui::Element TuringUI::Render() {
     auto mainControl = ftxui::hbox(
         {stepButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
          runButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
+         resetButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
          ftxui::vbox({ftxui::text(L"Алфавит"), ftxui::separatorLight(),
                       alphInput->Render()}) |
              ftxui::borderLight,
@@ -181,7 +202,9 @@ ftxui::Element TuringUI::Render() {
                      removeButton->Render() | ftxui::color(ftxui::Color::Red)});
 
     auto mainBox =
-        ftxui::vbox({ftxui::text(L"Машина Тьюринга") | ftxui::bold,
+        ftxui::vbox({ftxui::vbox({ftxui::text(L"Машина Тьюринга") | ftxui::bold, helpButton->Render()
+         | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 4)
+         | ftxui::color(ftxui::Color::Yellow1)}),
                      ftxui::separatorHeavy(), tapeAndButtons, mainControl,
                      buttonsTable, tableComponent->Render()}) |
         ftxui::border;
