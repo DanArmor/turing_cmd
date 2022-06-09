@@ -242,7 +242,7 @@ void TuringUI::makeTurn(void){
     updateComponents();
 }
 
-void TuringUI::updateTape(void){
+void TuringUI::updateStateTape(void){
     auto v = this->tapeComponent->getStrs();
     int leftIndex = this->tapeComponent->getLeftIndex();
     int size = this->tapeComponent->getSize();
@@ -273,7 +273,7 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
         this->status.status = TuringUIStatus::STEP;
         if(this->isResetState){
             this->isResetState = false;
-            this->updateTape();
+            this->updateStateTape();
             this->machine.loadState(this->state);
             this->updateComponents();
         }

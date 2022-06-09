@@ -130,7 +130,7 @@ class TuringUI : public ftxui::ComponentBase {
    private:
     void updateComponents(void);
     void makeTurn(void);
-    void updateTape(void);
+    void updateStateTape(void);
     std::function<void()> quit;
     TuringState state;
     TuringMachine machine;
