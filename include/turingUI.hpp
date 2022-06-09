@@ -81,7 +81,7 @@ class TuringTapeUI : public ftxui::ComponentBase {
    private:
     int size;
     int leftIndex;
-    int CELL_SIZE = 5;
+    int CELL_SIZE = 4;
     int positionAbsolute = 0;
     std::vector<std::wstring> tapeStrs;
     std::vector<ftxui::Component> tapeInputs;
@@ -94,6 +94,7 @@ class TuringTapeUI : public ftxui::ComponentBase {
 
     int getSize(void);
     int getLeftIndex(void);
+    std::vector<std::wstring> &getStrs(void);
     void setChar(wchar_t c, int pos);
     void setPositionAbsolute(int pos);
 
@@ -101,18 +102,45 @@ class TuringTapeUI : public ftxui::ComponentBase {
     bool OnEvent(ftxui::Event) override;
 };
 
+struct TuringUIStatus{
+    enum Status{
+        START,
+        STEP,
+        RUNNING,
+        STOP
+    };
+    Status status = START;
+    ftxui::Element Render(){
+        switch (status) {
+            case START:
+                return ftxui::text(L"Start state") | ftxui::color(ftxui::Color::BlueViolet);
+            case STEP:
+                return ftxui::text(L"Step") | ftxui::color(ftxui::Color::Green1) | ftxui::blink;
+            case RUNNING:
+                return ftxui::text(L"Running") | ftxui::color(ftxui::Color::Green3);
+            case STOP:
+                return ftxui::text(L"Stopped. Need to reset") | ftxui::color(ftxui::Color::Red1);
+            default:
+                throw std::invalid_argument("Неизвестный статус");
+        }
+    }
+};
+
 class TuringUI : public ftxui::ComponentBase {
    private:
     void updateComponents(void);
+    void makeTurn(void);
+    void updateTape(void);
     std::function<void()> quit;
     TuringState state;
     TuringMachine machine;
 
-    std::atomic<bool> isResetState;
-    std::atomic<bool> isRunning;
+    std::atomic<bool> isResetState = true;
+    std::atomic<bool> isRunning = false;
 
     bool needToUpdateTable = false;
-    std::wstring alphStr, commentStr;
+    std::wstring alphStr, commentStr, fileStr;
+    TuringUIStatus status;
 
     ftxui::Component helpButton;
 
@@ -124,6 +152,7 @@ class TuringUI : public ftxui::ComponentBase {
     ftxui::Component resetButton;
     ftxui::Component alphInput;
     ftxui::Component commentInput;
+    ftxui::Component fileInput;
 
     ftxui::Component addButton;
     ftxui::Component removeButton;

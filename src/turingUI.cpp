@@ -18,7 +18,9 @@ TuringTurn TuringCellUI::getTurn(){
         direction = pickDirect(str[0]);
         whereToPickFrom = 1;
     }
-    newState = std::stoi(str.substr(whereToPickFrom));
+    if(str.size() != 1){
+        newState = std::stoi(str.substr(whereToPickFrom));
+    }
     return TuringTurn(newState, newSymbol, direction);
 }
 
@@ -177,8 +179,13 @@ int TuringTapeUI::toLocalPos(int pos) { return pos - leftIndex; }
 void TuringTapeUI::setChar(wchar_t c, int pos) {
     if (!isValidPos(pos)) return;
     pos = toLocalPos(pos);
-    tapeStrs[pos] = c;
+    if(c == TURING_EMPTY)
+        tapeStrs[pos] = L"";
+    else
+        tapeStrs[pos] = c;
 }
+
+std::vector<std::wstring> &TuringTapeUI::getStrs(void) { return tapeStrs;}
 
 void TuringTapeUI::setPositionAbsolute(int pos) { positionAbsolute = pos; }
 
@@ -221,11 +228,35 @@ void TuringUI::updateComponents(void){
     for(int i = 0; i < size; i++){
         this->tapeComponent->setChar(tape.getChar(i + leftIndex), i + leftIndex);
     }
+    this->tapeComponent->setPositionAbsolute(this->machine.getCurPosition());
+}
+
+void TuringUI::makeTurn(void){
+    this->machine.clearTurns();
+    this->machine.setAlph(this->alphStr);
+    auto v = this->tableComponent->getTurns();
+    for(auto turn : v){
+        this->machine.addTurn(turn);
+    }
+    this->machine.makeTurn();
+    updateComponents();
+}
+
+void TuringUI::updateTape(void){
+    auto v = this->tapeComponent->getStrs();
+    int leftIndex = this->tapeComponent->getLeftIndex();
+    int size = this->tapeComponent->getSize();
+    for(int i = 0; i < size; i++){
+        this->state.tape.setChar(i+leftIndex, v[i].size() ? v[i][0] : TURING_EMPTY);
+    }
 }
 
 // MAIN UI
 TuringUI::TuringUI(std::function<void()> quitFunc) {
     quit = quitFunc;
+
+    status.status = TuringUIStatus::START;
+    alphStr = TURING_EMPTY_STR;
 
     state.position = 0;
     state.currState = 0;
@@ -239,17 +270,36 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
 
 
     stepButton = ftxui::Button("Step", [this]() {
-        this->machine.clearTurns();
-        this->machine.setAlph(this->alphStr);
-        auto v = this->tableComponent->getTurns();
-        for(auto turn : v){
-            this->machine.addTurn(turn);
+        this->status.status = TuringUIStatus::STEP;
+        if(this->isResetState){
+            this->isResetState = false;
+            this->updateTape();
+            this->machine.loadState(this->state);
+            this->updateComponents();
         }
-        this->machine.makeTurn();
+        if(!this->machine.isDone()){
+            this->makeTurn();
+        } else if(this->status.status != TuringUIStatus::STOP) {
+            this->status.status = TuringUIStatus::STOP;
+        }
+    });
+
+    runButton = ftxui::Button("Run", [&]() {
+        this->status.status = TuringUIStatus::RUNNING;
+        this->isRunning = true;
+
+    });
+
+    resetButton = ftxui::Button("Reset", [&](){
+        this->status.status = TuringUIStatus::START;
+        this->isResetState = true;
+        this->isRunning = false;
+        this->machine.clear();
+        this->machine.loadState(state);
         updateComponents();
     });
-    runButton = ftxui::Button("Run", [&]() {});
-    resetButton = ftxui::Button("Reset", [&](){});
+
+    fileInput = ftxui::Input(&fileStr, L"");
 
     ftxui::InputOption alphInputOption;
     alphInputOption.on_change = [this](void) {
@@ -266,7 +316,7 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
     tableComponent = ftxui::Make<TuringTableUI>();
 
     Add(ftxui::Container::Vertical(
-        {helpButton,
+        {ftxui::Container::Horizontal({helpButton, fileInput}),
          ftxui::Container::Horizontal(
              {moveTapeLeftButton, tapeComponent, moveTapeRightButton}),
          ftxui::Container::Horizontal(
@@ -295,12 +345,20 @@ ftxui::Element TuringUI::Render() {
 
     auto buttonsTable =
         ftxui::hbox({addButton->Render() | ftxui::color(ftxui::Color::Green),
-                     removeButton->Render() | ftxui::color(ftxui::Color::Red)});
+                     removeButton->Render() | ftxui::color(ftxui::Color::Red),
+                     ftxui::vbox({
+                         ftxui::text(L"Текущее состояние"), ftxui::separatorLight(), ftxui::text(std::to_string(machine.getCurState()))
+                         }) | ftxui::borderLight
+                     });
 
     auto mainBox =
-        ftxui::vbox({ftxui::vbox({ftxui::text(L"Машина Тьюринга") | ftxui::bold, helpButton->Render()
-         | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 4)
-         | ftxui::color(ftxui::Color::Yellow1)}),
+        ftxui::vbox({ftxui::vbox({ftxui::text(L"Машина Тьюринга") | ftxui::bold,
+        ftxui::hbox({status.Render() | ftxui::border,
+         helpButton->Render()
+         | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 6)
+         | ftxui::color(ftxui::Color::Yellow1),
+         ftxui::vbox({ftxui::text(L"Имя файла"), fileInput->Render()}) | ftxui::border}),
+          }),
                      ftxui::separatorHeavy(), tapeAndButtons, mainControl,
                      buttonsTable, tableComponent->Render()}) |
         ftxui::border;

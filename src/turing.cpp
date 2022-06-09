@@ -24,7 +24,13 @@ TuringTurn::~TuringTurn() {}
 TuringTape::TuringTape() {}
 TuringTape::~TuringTape() {}
 
-void TuringTape::setChar(int pos, wchar_t c) { tape[pos] = c; }
+void TuringTape::setChar(int pos, wchar_t c) {
+    if(c == TURING_EMPTY){
+        tape.erase(pos);
+    } else{
+        tape[pos] = c;
+    }
+}
 
 wchar_t TuringTape::getChar(int pos) {
     if (tape.count(pos) == 0) {
