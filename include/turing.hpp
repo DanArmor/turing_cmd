@@ -80,6 +80,7 @@ class TuringMachine {
 
     bool isDone(void);
     void clear(void);
+    void clearTurns(void);
 
    private:
     std::map<std::pair<int, wchar_t>, TuringTurn> table;
@@ -90,5 +91,6 @@ class TuringMachine {
 };
 
 std::wstring pickDirectStr(TuringDirection direction);
+TuringDirection pickDirect(wchar_t c);
 
 #endif

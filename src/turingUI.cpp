@@ -1,36 +1,84 @@
 #include "turingUI.hpp"
 
+
+
+TuringCellUI::TuringCellUI(int number_) : number(number_) { input = ftxui::Input(&str, L""); Add(input);}
+TuringCellUI::TuringCellUI(int number_, bool isTop_) : isTop(isTop_), number(number_) { input = ftxui::Input(&str, L""); Add(input);}
+
+TuringTurn TuringCellUI::getTurn(){
+    wchar_t newSymbol = TURING_EMPTY;
+    int newState = -1;
+    TuringDirection direction = TuringDirection::NoMove;
+    int whereToPickFrom = 0;
+    if(str[0] != '<' && str[0] != '>' && str[0] != '|'){
+        newSymbol = str[0];
+        direction = pickDirect(str[1]);
+        whereToPickFrom = 2;
+    } else{
+        direction = pickDirect(str[0]);
+        whereToPickFrom = 1;
+    }
+    newState = std::stoi(str.substr(whereToPickFrom));
+    return TuringTurn(newState, newSymbol, direction);
+}
+
+bool TuringCellUI::containStr(){
+    return str.size() != 0;
+}
+
+ftxui::Element TuringCellUI::Render(){
+    std::vector<ftxui::Element> elems;
+    if(isTop)
+        elems.push_back(ftxui::vbox({
+            ftxui::text(L"Q" + std::to_wstring(number)),
+            ftxui::separator(),
+            input->Render() | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 5)})
+        );
+    else
+        elems.push_back(input->Render() | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 5));
+    elems.push_back(ftxui::separator());
+    return ftxui::hbox(elems);
+}
+
+bool TuringCellUI::OnEvent(ftxui::Event event){
+    return this->ChildAt(0)->OnEvent(event);
+}
+
 // ROW UI
 
 TuringRowUI::TuringRowUI() { Add(ftxui::Container::Horizontal({})); }
 TuringRowUI::TuringRowUI(bool isTop_) : isTop(isTop_) { Add(ftxui::Container::Horizontal({})); }
 
 void TuringRowUI::addCol(){
-    strs.push_back(L"");
-    inputs.push_back(ftxui::Input(strs.back(), L""));
-    ChildAt(0)->Add(inputs.back());
+    cells.push_back(ftxui::Make<TuringCellUI>(size(), isTop));
+    ChildAt(0)->Add(cells.back());
 }
 void TuringRowUI::removeCol(){
-    if(strs.size() != 0){
-        strs.pop_back();
+    if(cells.size() != 0){
         ChildAt(0)->ChildAt(ChildAt(0)->ChildCount()-1)->Detach();
-        inputs.pop_back();
+        cells.pop_back();
     }
+}
+
+int TuringRowUI::size(void){
+    return cells.size();
+}
+
+bool TuringRowUI::containStr(int i){
+    return cells[i]->containStr();
 }
 
 ftxui::Element TuringRowUI::Render(){
     std::vector<ftxui::Element> elems;
-    for(int i = 0; i < strs.size(); i++){
-        if(isTop)
-            elems.push_back(ftxui::vbox({
-                ftxui::text(L"Q" + std::to_wstring(i)),
-                ftxui::separator(),
-                inputs[i]->Render() | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 5)}));
-        else
-            elems.push_back(inputs[i]->Render() | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 5));
+    for(int i = 0; i < cells.size(); i++){
+        elems.push_back(cells[i]->Render());
         elems.push_back(ftxui::separator());
     }
     return ftxui::hbox(elems) | ftxui::border;
+}
+
+TuringTurn TuringRowUI::getTurn(int i){
+    return cells[i]->getTurn();
 }
 
 bool TuringRowUI::OnEvent(ftxui::Event event){
@@ -49,14 +97,20 @@ ftxui::Element TuringTableUI::Render() {
             ftxui::text(std::wstring{alph[i]}), rowsComponents[i]->Render()
         }));
     }
-    return ftxui::vbox(elems);
+    return ftxui::vbox(elems) | ftxui::frame;
 }
 
 bool TuringTableUI::OnEvent(ftxui::Event event) {
     return ChildAt(0)->OnEvent(event);
 }
 
-int TuringTableUI::cols(void) { return 0; }
+int TuringTableUI::cols(void) {
+    if(rows() == 0){
+        return 0;
+    } else{
+        return rowsComponents[0]->size();
+    }
+}
 
 int TuringTableUI::rows(void) { return rowsComponents.size(); }
 
@@ -66,6 +120,21 @@ void TuringTableUI::removeCol(void) {
     for(int i = 0; i < rowsComponents.size(); i++){
         rowsComponents[i]->removeCol();
     }
+}
+
+std::vector<TuringTurn> TuringTableUI::getTurns(void){
+    std::vector<TuringTurn> turns;
+    for(int i = 0; i < rows(); i++){
+        for(int j = 0; j < cols(); j++){
+            if(rowsComponents[i]->containStr(j)){
+                TuringTurn turn = rowsComponents[i]->getTurn(j);
+                turn.oldState = j;
+                turn.oldSymbol = alph[i];
+                turns.push_back(turn);
+            }
+        }
+    }
+    return turns;
 }
 
 void TuringTableUI::addRow(wchar_t c, bool isTop_) {
@@ -94,7 +163,7 @@ TuringTapeUI::TuringTapeUI(int size_) {
     leftIndex = -(size_ / 2);
     tapeStrs.resize(size);
     for (int i = 0; i < size; i++) {
-        tapeInputs.push_back(ftxui::Input(tapeStrs[i], &TURING_EMPTY_STR));
+        tapeInputs.push_back(ftxui::Input(&tapeStrs[i], &TURING_EMPTY_STR));
     }
     Add(ftxui::Container::Horizontal(tapeInputs));
 }
@@ -138,20 +207,47 @@ ftxui::Element TuringTapeUI::Render() {
     return ftxui::hbox({cells});
 }
 
+int TuringTapeUI::getSize(void) { return size; }
+int TuringTapeUI::getLeftIndex(void) { return leftIndex; }
+
 bool TuringTapeUI::OnEvent(ftxui::Event event) {
     return ChildAt(0)->OnEvent(event);
+}
+
+void TuringUI::updateComponents(void){
+    auto tape = this->machine.getTape();
+    int leftIndex = this->tapeComponent->getLeftIndex();
+    int size = this->tapeComponent->getSize();
+    for(int i = 0; i < size; i++){
+        this->tapeComponent->setChar(tape.getChar(i + leftIndex), i + leftIndex);
+    }
 }
 
 // MAIN UI
 TuringUI::TuringUI(std::function<void()> quitFunc) {
     quit = quitFunc;
 
+    state.position = 0;
+    state.currState = 0;
+
+    machine.loadState(state);
+
     helpButton = ftxui::Button("Help", [&](){});
     
     moveTapeLeftButton = ftxui::Button("←Move", [&]() {});
     moveTapeRightButton = ftxui::Button("Move➔", [&]() {});
 
-    stepButton = ftxui::Button("Step", [&]() {});
+
+    stepButton = ftxui::Button("Step", [this]() {
+        this->machine.clearTurns();
+        this->machine.setAlph(this->alphStr);
+        auto v = this->tableComponent->getTurns();
+        for(auto turn : v){
+            this->machine.addTurn(turn);
+        }
+        this->machine.makeTurn();
+        updateComponents();
+    });
     runButton = ftxui::Button("Run", [&]() {});
     resetButton = ftxui::Button("Reset", [&](){});
 
@@ -219,6 +315,10 @@ bool TuringUI::OnEvent(ftxui::Event event) {
     }
 
     bool answer = ChildAt(0)->OnEvent(event);
+
+    if(alphStr.size() == 0 || alphStr[0] != TURING_EMPTY){
+        alphStr = TURING_EMPTY_STR + alphStr;
+    }
 
     if (needToUpdateTable) {
         needToUpdateTable = false;

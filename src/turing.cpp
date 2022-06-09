@@ -120,6 +120,20 @@ int TuringMachine::getCurPosition(void) { return state.position; }
 int TuringMachine::getCurState(void) { return state.currState; }
 bool TuringMachine::isDone(void) { return stop; }
 void TuringMachine::clear(void) { stop = false; }
+void TuringMachine::clearTurns(void){ table.clear(); }
+
+TuringDirection pickDirect(wchar_t c){
+    switch (c) {
+        case '<':
+            return TuringDirection::Left;
+        case '>':
+            return TuringDirection::Right;
+        case '|':
+            return TuringDirection::NoMove;
+        default:
+            throw(std::invalid_argument("Неизвестное направление. Код символа: " + std::to_string(c)));
+    }
+}
 
 std::wstring pickDirectStr(TuringDirection direction) {
     switch (direction) {

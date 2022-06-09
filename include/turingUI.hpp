@@ -2,6 +2,8 @@
 #define _INC_TURING_UI_H
 
 #include <string>
+#include <atomic>
+#include <thread>
 
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
@@ -12,10 +14,27 @@
 #include "ftxui/util/ref.hpp"
 #include "turing.hpp"
 
+class TuringCellUI : public ftxui::ComponentBase {
+   private:
+    int number;
+    std::wstring str;
+    ftxui::Component input;
+    bool isTop = false;
+
+   public:
+    TuringCellUI(int number_);
+    TuringCellUI(int number_, bool isTop_);
+
+    TuringTurn getTurn();
+    bool containStr();
+
+    ftxui::Element Render() override;
+    bool OnEvent(ftxui::Event) override;
+};
+
 class TuringRowUI : public ftxui::ComponentBase {
    private:
-    std::vector<std::wstring> strs;
-    std::vector<ftxui::Component> inputs;
+    std::vector<std::shared_ptr<TuringCellUI>> cells;
     bool isTop = false;
 
    public:
@@ -24,6 +43,10 @@ class TuringRowUI : public ftxui::ComponentBase {
 
     void addCol();
     void removeCol();
+
+    TuringTurn getTurn(int i);
+    bool containStr(int i);
+    int size(void);
 
     ftxui::Element Render() override;
     bool OnEvent(ftxui::Event) override;
@@ -46,6 +69,8 @@ class TuringTableUI : public ftxui::ComponentBase {
     void addRow(wchar_t c, bool isTop_);
     void addCol(void);
 
+    std::vector<TuringTurn> getTurns(void);
+
     void updateTable(std::wstring alph_);
 
     ftxui::Element Render() override;
@@ -67,6 +92,8 @@ class TuringTapeUI : public ftxui::ComponentBase {
    public:
     TuringTapeUI(int size_);
 
+    int getSize(void);
+    int getLeftIndex(void);
     void setChar(wchar_t c, int pos);
     void setPositionAbsolute(int pos);
 
@@ -76,11 +103,14 @@ class TuringTapeUI : public ftxui::ComponentBase {
 
 class TuringUI : public ftxui::ComponentBase {
    private:
+    void updateComponents(void);
     std::function<void()> quit;
     TuringState state;
     TuringMachine machine;
 
-    bool isRunning = false;
+    std::atomic<bool> isResetState;
+    std::atomic<bool> isRunning;
+
     bool needToUpdateTable = false;
     std::wstring alphStr, commentStr;
 
