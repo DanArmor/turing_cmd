@@ -95,7 +95,9 @@ class TuringTapeUI : public ftxui::ComponentBase {
     int getSize(void);
     int getLeftIndex(void);
     std::vector<std::wstring> &getStrs(void);
+
     void setChar(wchar_t c, int pos);
+    void setLeftIndex(int pos);
     void setPositionAbsolute(int pos);
 
     ftxui::Element Render() override;
@@ -106,7 +108,8 @@ struct TuringUIStatus{
     enum Status{
         START,
         STEP,
-        RUNNING,
+        RUNNING_ON,
+        RUNNING_OFF,
         STOP
     };
     Status status = START;
@@ -116,8 +119,10 @@ struct TuringUIStatus{
                 return ftxui::text(L"Start state") | ftxui::color(ftxui::Color::BlueViolet);
             case STEP:
                 return ftxui::text(L"Step") | ftxui::color(ftxui::Color::Green1) | ftxui::blink;
-            case RUNNING:
+            case RUNNING_ON:
                 return ftxui::text(L"Running") | ftxui::color(ftxui::Color::Green3);
+            case RUNNING_OFF:
+                return ftxui::text(L"Running") | ftxui::color(ftxui::Color::DarkGreen);
             case STOP:
                 return ftxui::text(L"Stopped. Need to reset") | ftxui::color(ftxui::Color::Red1);
             default:

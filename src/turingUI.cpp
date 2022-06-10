@@ -171,6 +171,10 @@ TuringTapeUI::TuringTapeUI(int size_) {
     Add(ftxui::Container::Horizontal(tapeInputs));
 }
 
+void TuringTapeUI::setLeftIndex(int pos){
+    leftIndex = pos;
+}
+
 bool TuringTapeUI::isValidPos(int pos) {
     return pos >= leftIndex && pos < leftIndex + size;
 }
@@ -267,8 +271,28 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
 
     helpButton = ftxui::Button("Help", [&](){});
     
-    moveTapeLeftButton = ftxui::Button("←Move", [&]() {});
-    moveTapeRightButton = ftxui::Button("Move➔", [&]() {});
+    moveTapeLeftButton = ftxui::Button("←Move", [&]() {
+        if(this->isResetState){
+            this->updateStateTape();
+            this->machine.loadState(this->state);
+            this->tapeComponent->setLeftIndex(this->tapeComponent->getLeftIndex() - 5);
+            this->updateComponents();
+        } else{
+            this->tapeComponent->setLeftIndex(this->tapeComponent->getLeftIndex() - 5);
+            this->updateComponents();
+        }
+    });
+    moveTapeRightButton = ftxui::Button("Move➔", [&]() {
+        if(this->isResetState){
+            this->updateStateTape();
+            this->machine.loadState(this->state);
+            this->tapeComponent->setLeftIndex(this->tapeComponent->getLeftIndex() + 5);
+            this->updateComponents();
+        } else{
+            this->tapeComponent->setLeftIndex(this->tapeComponent->getLeftIndex() + 5);
+            this->updateComponents();
+        }
+    });
 
 
     stepButton = ftxui::Button("Step", [this]() {
@@ -287,7 +311,7 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
     });
 
     runButton = ftxui::Button("Run", [&]() {
-        this->status.status = TuringUIStatus::RUNNING;
+        this->status.status = TuringUIStatus::RUNNING_ON;
         if(this->isResetState){
             this->isResetState = false;
             this->updateStateTape();
@@ -295,6 +319,7 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
             this->updateComponents();
         }
         if(this->isRunning){
+            this->status.status = TuringUIStatus::RUNNING_OFF;
             this->isRunning = false;
         } else{
             this->isRunning = true;
@@ -304,12 +329,12 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
                 while(this->isRunning){
                     if(!this->machine.isDone()){
                         this->makeTurn();
-                        this->refresh();
                         std::this_thread::sleep_for(refresh_time);
                     } else if(this->status.status != TuringUIStatus::STOP) {
                         this->status.status = TuringUIStatus::STOP;
                         this->isRunning = false;
                     }
+                    this->refresh();
                 }
             });
             runFunc.detach();
@@ -360,11 +385,19 @@ ftxui::Element TuringUI::Render() {
         {moveTapeLeftButton->Render() | ftxui::color(ftxui::Color::DarkOrange),
          tapeComponent->Render(),
          moveTapeRightButton->Render() |
-             ftxui::color(ftxui::Color::DarkOrange)});
+    ftxui::color(ftxui::Color::DarkOrange)});
+
+    auto runButtonColor = [&](){
+        if(this->isRunning){
+            return ftxui::color(ftxui::Color::DarkRed);
+        } else{
+            return ftxui::color(ftxui::Color::SkyBlue1);
+        }
+    };
 
     auto mainControl = ftxui::hbox(
         {stepButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
-         runButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
+         runButton->Render() | runButtonColor(),
          resetButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
          ftxui::vbox({ftxui::text(L"Алфавит"), ftxui::separatorLight(),
                       alphInput->Render()}) |
@@ -398,6 +431,7 @@ ftxui::Element TuringUI::Render() {
 
 bool TuringUI::OnEvent(ftxui::Event event) {
     if (event == ftxui::Event::Escape) {
+        this->isRunning = false;
         quit();
         return true;
     }
