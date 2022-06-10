@@ -142,6 +142,7 @@ class TuringUI : public ftxui::ComponentBase {
 
     std::atomic<bool> isResetState = true;
     std::atomic<bool> isRunning = false;
+    std::atomic<bool> isShowingHelp = false;
 
     bool needToUpdateTable = false;
     std::wstring alphStr, commentStr, fileStr;
@@ -161,6 +162,9 @@ class TuringUI : public ftxui::ComponentBase {
 
     ftxui::Component addButton;
     ftxui::Component removeButton;
+
+    ftxui::Component toMainDisplay;
+    ftxui::Component toHelpDisplay;
 
     std::shared_ptr<TuringTapeUI> tapeComponent;
     std::shared_ptr<TuringTableUI> tableComponent;
