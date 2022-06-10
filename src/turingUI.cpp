@@ -443,7 +443,7 @@ ftxui::Element TuringUI::Render() {
             }),
             ftxui::paragraphAlignLeft("Правее кнопки справки находится поле для ввода имени файла."),
             ftxui::paragraphAlignLeft("При нажатии кнопки Enter будет произведено сохранение текущей таблицы состояний."),
-            ftxui::paragraphAlignLeft("и ленты в состоянии Start state в файл"),
+            ftxui::paragraphAlignLeft("и ленты в состоянии Start state в файл, а так же комментарий"),
             ftxui::text(""),
             ftxui::paragraphAlignLeft("Для загрузки Машины Тьюринга из файла выйдите из программы и запустите, указав имя файла после имени программы."),
             ftxui::paragraphAlignLeft("Формат сохранений json. При необходимости, вы можете редактировать их вручную, соблюдая структуру"),
