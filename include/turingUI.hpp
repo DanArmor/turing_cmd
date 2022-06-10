@@ -81,7 +81,7 @@ class TuringTapeUI : public ftxui::ComponentBase {
    private:
     int size;
     int leftIndex;
-    int CELL_SIZE = 4;
+    int CELL_SIZE = 6;
     int positionAbsolute = 0;
     std::vector<std::wstring> tapeStrs;
     std::vector<ftxui::Component> tapeInputs;
@@ -159,9 +159,11 @@ class TuringUI : public ftxui::ComponentBase {
 
     std::shared_ptr<TuringTapeUI> tapeComponent;
     std::shared_ptr<TuringTableUI> tableComponent;
+    ftxui::ScreenInteractive *scr;
 
    public:
-    TuringUI(std::function<void()> quitFunc);
+    TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr_);
+    void refresh(void);
 
     ftxui::Element Render() override;
     bool OnEvent(ftxui::Event) override;

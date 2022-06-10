@@ -19,7 +19,7 @@
 int main() {
     auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
-    auto ui = ftxui::Make<TuringUI>(screen.ExitLoopClosure());
+    auto ui = ftxui::Make<TuringUI>(screen.ExitLoopClosure(), &screen);
 
     screen.Loop(ui);
 

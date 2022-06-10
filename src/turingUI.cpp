@@ -1,5 +1,6 @@
 #include "turingUI.hpp"
 
+#include <chrono>
 
 
 TuringCellUI::TuringCellUI(int number_) : number(number_) { input = ftxui::Input(&str, L""); Add(input);}
@@ -252,8 +253,9 @@ void TuringUI::updateStateTape(void){
 }
 
 // MAIN UI
-TuringUI::TuringUI(std::function<void()> quitFunc) {
+TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr_) {
     quit = quitFunc;
+    scr = scr_;
 
     status.status = TuringUIStatus::START;
     alphStr = TURING_EMPTY_STR;
@@ -286,8 +288,32 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
 
     runButton = ftxui::Button("Run", [&]() {
         this->status.status = TuringUIStatus::RUNNING;
-        this->isRunning = true;
-
+        if(this->isResetState){
+            this->isResetState = false;
+            this->updateStateTape();
+            this->machine.loadState(this->state);
+            this->updateComponents();
+        }
+        if(this->isRunning){
+            this->isRunning = false;
+        } else{
+            this->isRunning = true;
+            std::thread runFunc([&]{
+                using namespace std::chrono_literals;
+                const auto refresh_time = 0.4s;
+                while(this->isRunning){
+                    if(!this->machine.isDone()){
+                        this->makeTurn();
+                        this->refresh();
+                        std::this_thread::sleep_for(refresh_time);
+                    } else if(this->status.status != TuringUIStatus::STOP) {
+                        this->status.status = TuringUIStatus::STOP;
+                        this->isRunning = false;
+                    }
+                }
+            });
+            runFunc.detach();
+        }
     });
 
     resetButton = ftxui::Button("Reset", [&](){
@@ -323,6 +349,10 @@ TuringUI::TuringUI(std::function<void()> quitFunc) {
              {stepButton, runButton, resetButton, alphInput, commentInput}),
          ftxui::Container::Horizontal({addButton, removeButton}),
          tableComponent}));
+}
+
+void TuringUI::refresh(void){
+    scr->PostEvent(ftxui::Event::Custom);
 }
 
 ftxui::Element TuringUI::Render() {
