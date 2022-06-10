@@ -12,6 +12,8 @@
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/screen/string.hpp"
 #include "ftxui/util/ref.hpp"
+
+#include "tao/json.hpp"
 #include "turing.hpp"
 
 class TuringCellUI : public ftxui::ComponentBase {

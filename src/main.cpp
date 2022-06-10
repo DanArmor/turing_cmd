@@ -25,8 +25,7 @@ int main(int argc, char **argv) {
 
         screen.Loop(ui);
     } else if(argc == 2){
-        std::cout << "Not implemented yet";
-        exit(1);
+        const tao::json::value v = tao::json::from_file(argv[1]);
     } else{
         std::cout << "Слишком много аргументов. Введите только имя программы или имя программы и имя файла для открытия\n";
         exit(1);
