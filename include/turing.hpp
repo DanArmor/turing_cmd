@@ -63,7 +63,7 @@ class TuringMachine {
 
     void loadState(TuringState newState);
     void setAlph(std::wstring str);
-    void setComment(std::wstring const &str);
+    void setComment(std::string const &str);
 
     void addTurn(TuringTurn turn);
     void addTurn(std::pair<int, wchar_t> old, TuringTurn turn);
@@ -86,7 +86,7 @@ class TuringMachine {
     std::map<std::pair<int, wchar_t>, TuringTurn> table;
     std::set<wchar_t> alph;
     bool stop = false;
-    std::wstring comment;
+    std::string comment;
     TuringState state;
 };
 

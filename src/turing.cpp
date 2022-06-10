@@ -78,7 +78,7 @@ void TuringMachine::setAlph(std::wstring str) {
         alph.insert(c);
     }
 }
-void TuringMachine::setComment(std::wstring const &str) { comment = str; }
+void TuringMachine::setComment(std::string const &str) { comment = str; }
 
 void TuringMachine::addTurn(TuringTurn turn) {
     table[std::make_pair(turn.oldState, turn.oldSymbol)] = turn;

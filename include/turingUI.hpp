@@ -133,11 +133,20 @@ struct TuringUIStatus{
     }
 };
 
+struct TuringSave{
+    std::string fileName;
+    std::string comm;
+    std::wstring alph;
+    std::map<std::pair<int, wchar_t>, TuringTurn> table;
+    std::map<int, wchar_t> tape;
+};
+
 class TuringUI : public ftxui::ComponentBase {
    private:
     void updateComponents(void);
     void makeTurn(void);
     void updateStateTape(void);
+    void saveToFile(void);
     std::function<void()> quit;
     TuringState state;
     TuringMachine machine;
@@ -147,7 +156,8 @@ class TuringUI : public ftxui::ComponentBase {
     std::atomic<bool> isShowingHelp = false;
 
     bool needToUpdateTable = false;
-    std::wstring alphStr, commentStr, fileStr;
+    std::wstring alphStr;
+    std::string commentStr, fileStr;
     TuringUIStatus status;
 
     ftxui::Component helpButton;
@@ -175,6 +185,8 @@ class TuringUI : public ftxui::ComponentBase {
    public:
     TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr_);
     void refresh(void);
+
+    void loadSave(TuringSave);
 
     ftxui::Element Render() override;
     bool OnEvent(ftxui::Event) override;

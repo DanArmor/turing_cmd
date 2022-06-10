@@ -360,14 +360,14 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
         updateComponents();
     });
 
-    fileInput = ftxui::Input(&fileStr, L"");
+    fileInput = ftxui::Input(&fileStr, "");
 
     ftxui::InputOption alphInputOption;
     alphInputOption.on_change = [this](void) {
         this->needToUpdateTable = true;
     };
     alphInput = ftxui::Input(&alphStr, L"", alphInputOption);
-    commentInput = ftxui::Input(&commentStr, L"");
+    commentInput = ftxui::Input(&commentStr, "");
 
     addButton = ftxui::Button("Add", [&]() { this->tableComponent->addCol(); });
     removeButton =
@@ -572,4 +572,21 @@ bool TuringUI::OnEvent(ftxui::Event event) {
     }
 
     return answer;
+}
+
+void TuringUI::loadSave(TuringSave save){
+    alphStr = save.alph;
+    commentStr = save.comm;
+    fileStr = save.fileName;
+
+    state.currState = 0;
+    state.position = 0;
+    for(auto it : save.tape){
+        state.tape.setChar(it.first, it.second);
+    }
+    machine.loadState(state);
+
+
+
+    updateComponents();
 }
