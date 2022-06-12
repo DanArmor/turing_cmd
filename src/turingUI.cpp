@@ -431,6 +431,17 @@ ftxui::Element TuringUI::Render() {
         ftxui::vbox({
             toHelpDisplay->Render() | ftxui::color(ftxui::Color::Red) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 10),
             ftxui::paragraphAlignLeft("Данная программа предназначена для работы с Машиной Тьюринга."),
+            ftxui::paragraphAlignLeft("Горячие клавиши:"),
+            ftxui::paragraphAlignLeft("CTRL-LEFT - сместиться по ленте на 5 ячеек влево"),
+            ftxui::paragraphAlignLeft("CTRL-RIGHT - сместиться по ленте на 5 ячеек вправо"),
+            ftxui::paragraphAlignLeft("CTRL-UP - добавить новое состояние в таблицу"),
+            ftxui::paragraphAlignLeft("CTRL-DOWN - убрать последнее состояние из таблицы"),
+            ftxui::paragraphAlignLeft("F5 - шаг выполнения"),
+            ftxui::paragraphAlignLeft("F6 - запуск/пауза непрерывного выполнения"),
+            ftxui::paragraphAlignLeft("F7 - возврат в изначальное состояние"),
+            ftxui::paragraphAlignLeft("F9 - справка"),
+            ftxui::paragraphAlignLeft("F10 - сохранить машину в файл"),
+            ftxui::paragraphAlignLeft(""),
             ftxui::paragraphAlignLeft("Слева сверху располагается индикатор состояния программы"),
             ftxui::paragraphAlignLeft("Возможны следующие состояния программы"),
             ftxui::hbox({
@@ -562,7 +573,7 @@ ftxui::Element TuringUI::Render() {
                         });
         auto fileErrRender = [&](){
             if(this->isErrorFile){
-                return ftxui::text("Ошибка при работе с файлом! Состояние не сохранено на диск");
+                return ftxui::text("Ошибка при работе с файлом! Состояние не сохранено на диск") | ftxui::borderDouble;
             } else{
                 return ftxui::vbox({});
             }
@@ -574,7 +585,7 @@ ftxui::Element TuringUI::Render() {
             | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 6)
             | ftxui::color(ftxui::Color::Yellow1),
             ftxui::vbox({ftxui::text(L"Имя файла"), fileInput->Render()}) | ftxui::border}),
-            fileErrRender() | ftxui::color(ftxui::Color::Red) | ftxui::borderDouble
+            fileErrRender() | ftxui::color(ftxui::Color::Red)
             }),
                         ftxui::separatorHeavy(), tapeAndButtons, mainControl,
                         buttonsTable, tableComponent->Render()}) |
@@ -584,10 +595,64 @@ ftxui::Element TuringUI::Render() {
     }
 }
 
+const ftxui::Event CTRL_LEFT = ftxui::Event::Special({27, 91, 49, 59, 53, 68});
+const ftxui::Event CTRL_RIGHT = ftxui::Event::Special({27, 91, 49, 59, 53, 67});
+const ftxui::Event CTRL_UP = ftxui::Event::Special({27, 91, 49, 59, 53, 65});
+const ftxui::Event CTRL_DOWN = ftxui::Event::Special({27, 91, 49, 59, 53, 66});
+
 bool TuringUI::OnEvent(ftxui::Event event) {
     if (event == ftxui::Event::Escape) {
         this->isRunning = false;
         quit();
+        return true;
+    }
+    if( event == CTRL_LEFT){
+        this->moveTapeLeftButton->OnEvent(ftxui::Event::Return);
+        this->refresh();
+        return true;
+    }
+    if( event == CTRL_RIGHT){
+        this->moveTapeRightButton->OnEvent(ftxui::Event::Return);
+        this->refresh();
+        return true;
+    }
+    if( event == CTRL_UP){
+        this->addButton->OnEvent(ftxui::Event::Return);
+        this->refresh();
+        return true;
+    }
+    if( event == CTRL_DOWN){
+        this->removeButton->OnEvent(ftxui::Event::Return);
+        this->refresh();
+        return true;
+    }
+    if( event == ftxui::Event::F5){
+        this->stepButton->OnEvent(ftxui::Event::Return);
+        this->refresh();
+        return true;
+    }
+    if( event == ftxui::Event::F6){
+        this->runButton->OnEvent(ftxui::Event::Return);
+        this->refresh();
+        return true;
+    }
+    if( event == ftxui::Event::F7){
+        this->resetButton->OnEvent(ftxui::Event::Return);
+        this->refresh();
+        return true;
+    }
+    if( event == ftxui::Event::F9){
+        if(this->isShowingHelp){
+            this->toHelpDisplay->OnEvent(ftxui::Event::Return);
+        } else{
+            this->helpButton->OnEvent(ftxui::Event::Return);
+        }
+        this->refresh();
+        return true;
+    }
+    if( event == ftxui::Event::F10){
+        this->fileInput->OnEvent(ftxui::Event::Return);
+        this->refresh();
         return true;
     }
 

@@ -1,0 +1,15 @@
+{
+  "alph": "",
+  "comm": "",
+  "table": {
+    "direct": [],
+    "newSt": [],
+    "newSym": [],
+    "oldSt": [],
+    "oldSym": []
+  },
+  "tape": {
+    "pos": [],
+    "sym": []
+  }
+}
