@@ -676,7 +676,10 @@ void TuringUI::saveToFile(void){
         this->isErrorFile = true;
         this->refresh();
         return;
-    }
+    }else{
+		this->isErrorFile = false;
+        this->refresh();
+	}
 
     auto alphToSave = ftxui::to_string(this->alphStr.substr(1));
     auto commentToSave = this->commentStr;
