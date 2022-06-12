@@ -375,6 +375,11 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
 
     ftxui::InputOption saveOption;
     saveOption.on_enter = [this](void){
+        if(this->isResetState){
+            this->updateStateTape();
+            this->machine.loadState(this->state);
+            this->updateComponents();
+        }
         this->saveToFile();
     };
     fileInput = ftxui::Input(&fileStr, "", saveOption);
@@ -629,9 +634,19 @@ void TuringUI::saveToFile(void){
     std::vector<TuringTurn> tableTurns = this->tableComponent->getTurns();
     for(int i = 0; i < tableTurns.size(); i++){
         oldSt.push_back(tableTurns[i].oldState);
-        oldSym.push_back(ftxui::to_string(std::wstring({tableTurns[i].oldSymbol})));
+        if(tableTurns[i].oldSymbol == TURING_EMPTY){
+            oldSym.push_back("#");
+        }else{
+            oldSym.push_back(ftxui::to_string(std::wstring({tableTurns[i].oldSymbol})));
+        }
+
+        if(tableTurns[i].newSymbol == TURING_EMPTY){
+            newSym.push_back("#");
+        }else{
+            newSym.push_back(ftxui::to_string(std::wstring({tableTurns[i].newSymbol})));
+        }
+
         newSt.push_back(tableTurns[i].newState);
-        newSym.push_back(ftxui::to_string(std::wstring({tableTurns[i].newSymbol})));
         direction.push_back(ftxui::to_string(pickDirectStr(tableTurns[i].direction)));
     }
 

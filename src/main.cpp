@@ -52,9 +52,9 @@ int main(int argc, char **argv) {
             for(int i = 0; i < oldSym.size(); i++){
                 save.table[std::make_pair(oldSt[i], wchar_t(oldSym[i][0]))] = TuringTurn(
                     oldSt[i],
-                    wchar_t(oldSym[i][0]),
+                    wchar_t(oldSym[i][0] == '#' ? TURING_EMPTY : oldSym[i][0]),
                     newSt[i],
-                    wchar_t(newSym[i][0]),
+                    wchar_t(newSym[i][0] == '#' ? TURING_EMPTY : newSym[i][0]),
                     pickDirect(wchar_t(direct[i][0]))
                 );
             }
