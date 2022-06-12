@@ -365,12 +365,19 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
     });
 
     resetButton = ftxui::Button("Reset", [&](){
-        this->status.status = TuringUIStatus::START;
-        this->isResetState = true;
-        this->isRunning = false;
-        this->machine.clear();
-        this->machine.loadState(state);
-        updateComponents();
+        if(this->isResetState){
+            this->updateStateTape();
+            this->machine.loadState(this->state);
+            this->updateComponents();
+            this->refresh();
+        } else{
+            this->status.status = TuringUIStatus::START;
+            this->isResetState = true;
+            this->isRunning = false;
+            this->machine.clear();
+            this->machine.loadState(state);
+            updateComponents();
+        }
     });
 
     ftxui::InputOption saveOption;
