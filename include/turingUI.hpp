@@ -68,6 +68,8 @@ class TuringTableUI : public ftxui::ComponentBase {
     void removeRow(void);
     void removeCol(void);
 
+    void loadSaved(int row, int col, std::wstring str);
+
     void addRow(wchar_t c, bool isTop_);
     void addCol(void);
 

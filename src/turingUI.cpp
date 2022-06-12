@@ -585,6 +585,15 @@ void TuringUI::loadSave(TuringSave save){
         state.tape.setChar(it.first, it.second);
     }
     machine.loadState(state);
+    this->tableComponent->updateTable(this->alphStr);
+
+    int cols = -1;
+    for(auto it : save.table){
+        while(cols < it.first.first){
+            this->tableComponent->addCol();
+            cols++;
+        }
+    }
 
 
 
