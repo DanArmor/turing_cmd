@@ -144,11 +144,11 @@ TuringDirection pickDirect(wchar_t c){
 std::wstring pickDirectStr(TuringDirection direction) {
     switch (direction) {
         case TuringDirection::Left:
-            return L"←";
+            return L"<";
         case TuringDirection::Right:
-            return L"→";
+            return L">";
         case TuringDirection::NoMove:
-            return L"↓";
+            return L"|";
         default:
             throw(std::invalid_argument("Неизвестное направление"));
     }

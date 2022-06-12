@@ -27,6 +27,8 @@ class TuringCellUI : public ftxui::ComponentBase {
     TuringCellUI(int number_);
     TuringCellUI(int number_, bool isTop_);
 
+    void loadSaved(std::wstring str_);
+
     TuringTurn getTurn();
     bool containStr();
 
@@ -45,6 +47,8 @@ class TuringRowUI : public ftxui::ComponentBase {
 
     void addCol();
     void removeCol();
+
+    void loadSavedCell(int i, std::wstring str);
 
     TuringTurn getTurn(int i);
     bool containStr(int i);
@@ -68,7 +72,7 @@ class TuringTableUI : public ftxui::ComponentBase {
     void removeRow(void);
     void removeCol(void);
 
-    void loadSaved(int row, int col, std::wstring str);
+    void loadSavedCell(int row, int col, std::wstring str);
 
     void addRow(wchar_t c, bool isTop_);
     void addCol(void);
@@ -156,6 +160,7 @@ class TuringUI : public ftxui::ComponentBase {
     std::atomic<bool> isResetState = true;
     std::atomic<bool> isRunning = false;
     std::atomic<bool> isShowingHelp = false;
+    std::atomic<bool> isErrorFile = false;
 
     bool needToUpdateTable = false;
     std::wstring alphStr;

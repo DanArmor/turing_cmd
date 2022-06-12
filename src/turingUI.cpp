@@ -1,6 +1,7 @@
 #include "turingUI.hpp"
 
 #include <chrono>
+#include <fstream>
 
 
 TuringCellUI::TuringCellUI(int number_) : number(number_) { input = ftxui::Input(&str, L""); Add(input);}
@@ -47,6 +48,10 @@ bool TuringCellUI::OnEvent(ftxui::Event event){
     return this->ChildAt(0)->OnEvent(event);
 }
 
+void TuringCellUI::loadSaved(std::wstring str_){
+    this->str = str_;
+}
+
 // ROW UI
 
 TuringRowUI::TuringRowUI() { Add(ftxui::Container::Horizontal({})); }
@@ -86,6 +91,10 @@ TuringTurn TuringRowUI::getTurn(int i){
 
 bool TuringRowUI::OnEvent(ftxui::Event event){
     return this->ChildAt(0)->OnEvent(event);
+}
+
+void TuringRowUI::loadSavedCell(int col, std::wstring str){
+    this->cells[col]->loadSaved(str);
 }
 
 // TABLE UI
@@ -158,6 +167,10 @@ void TuringTableUI::updateTable(std::wstring alph_){
         addRow(alph_[i], i == 0);
     }
     alph = alph_;
+}
+
+void TuringTableUI::loadSavedCell(int row, int col, std::wstring str){
+    this->rowsComponents[row]->loadSavedCell(col, str);
 }
 
 // TAPE UI
@@ -360,7 +373,12 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
         updateComponents();
     });
 
-    fileInput = ftxui::Input(&fileStr, "");
+    ftxui::InputOption saveOption;
+    saveOption.on_enter = [this](void){
+        this->saveToFile();
+    };
+    fileInput = ftxui::Input(&fileStr, "", saveOption);
+
 
     ftxui::InputOption alphInputOption;
     alphInputOption.on_change = [this](void) {
@@ -391,6 +409,7 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
     });
     Add(toMainDisplay);
 }
+
 
 void TuringUI::refresh(void){
     scr->PostEvent(ftxui::Event::Custom);
@@ -536,7 +555,13 @@ ftxui::Element TuringUI::Render() {
                             ftxui::text(L"Текущее состояние"), ftxui::separatorLight(), ftxui::text(std::to_string(machine.getCurState()))
                             }) | ftxui::borderLight
                         });
-
+        auto fileErrRender = [&](){
+            if(this->isErrorFile){
+                return ftxui::text("Ошибка при работе с файлом! Состояние не сохранено на диск");
+            } else{
+                return ftxui::vbox({});
+            }
+        };
         auto mainBox =
             ftxui::vbox({ftxui::vbox({ftxui::text(L"Машина Тьюринга") | ftxui::bold,
             ftxui::hbox({status.Render() | ftxui::border,
@@ -544,6 +569,7 @@ ftxui::Element TuringUI::Render() {
             | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 6)
             | ftxui::color(ftxui::Color::Yellow1),
             ftxui::vbox({ftxui::text(L"Имя файла"), fileInput->Render()}) | ftxui::border}),
+            fileErrRender() | ftxui::color(ftxui::Color::Red) | ftxui::borderDouble
             }),
                         ftxui::separatorHeavy(), tapeAndButtons, mainControl,
                         buttonsTable, tableComponent->Render()}) |
@@ -574,8 +600,130 @@ bool TuringUI::OnEvent(ftxui::Event event) {
     return answer;
 }
 
+void TuringUI::saveToFile(void){
+    std::fstream f(this->fileStr, std::ios::out);
+    if(!f){
+        this->isErrorFile = true;
+        this->refresh();
+        return;
+    }
+
+    auto alphToSave = ftxui::to_string(this->alphStr.substr(1));
+    auto commentToSave = this->commentStr;
+    std::vector<int> tapePos;
+    std::vector<std::string> tapeChar;
+    if(this->isResetState == false){
+        this->resetButton->OnEvent(ftxui::Event::Return);
+        this->refresh();
+    }
+    for(auto it : this->state.tape.getTapeMap()){
+        tapePos.push_back(it.first);
+        tapeChar.push_back(ftxui::to_string(std::wstring({it.second})));
+    }
+
+    std::vector<int> oldSt;
+    std::vector<std::string> oldSym;
+    std::vector<int> newSt;
+    std::vector<std::string> newSym;
+    std::vector<std::string> direction;
+    std::vector<TuringTurn> tableTurns = this->tableComponent->getTurns();
+    for(int i = 0; i < tableTurns.size(); i++){
+        oldSt.push_back(tableTurns[i].oldState);
+        oldSym.push_back(ftxui::to_string(std::wstring({tableTurns[i].oldSymbol})));
+        newSt.push_back(tableTurns[i].newState);
+        newSym.push_back(ftxui::to_string(std::wstring({tableTurns[i].newSymbol})));
+        direction.push_back(ftxui::to_string(pickDirectStr(tableTurns[i].direction)));
+    }
+
+    tao::json::events::to_value consumer;
+    consumer.begin_object();
+    consumer.key("alph");
+    consumer.string(alphToSave);
+    consumer.member();
+
+    consumer.key("comm");
+    consumer.string(commentToSave);
+    consumer.member();
+
+    consumer.key("tape");
+    consumer.begin_object();
+    consumer.key("pos");
+    consumer.begin_array();
+    for(int i = 0; i < tapePos.size(); i++){
+        consumer.number(std::int64_t(tapePos[i]));
+        consumer.element();
+    }
+    consumer.end_array();
+    consumer.member();
+    consumer.key("sym");
+    consumer.begin_array();
+    for(int i = 0; i < tapePos.size(); i++){
+        consumer.string(tapeChar[i]);
+        consumer.element();
+    }
+    consumer.end_array();
+    consumer.member();
+    consumer.end_object();
+    consumer.member();
+
+    consumer.key("table");
+    consumer.begin_object();
+    consumer.key("oldSt");
+    consumer.begin_array();
+    for(int i = 0; i < oldSt.size(); i++){
+        consumer.number(std::int64_t(oldSt[i]));
+        consumer.element();
+    }
+    consumer.end_array();
+    consumer.member();
+    consumer.key("oldSym");
+    consumer.begin_array();
+    for(int i = 0; i < oldSym.size(); i++){
+        consumer.string(oldSym[i]);
+        consumer.element();
+    }
+    consumer.end_array();
+    consumer.member();
+    consumer.key("newSt");
+    consumer.begin_array();
+    for(int i = 0; i < newSt.size(); i++){
+        consumer.number(std::int64_t(newSt[i]));
+        consumer.element();
+    }
+    consumer.end_array();
+    consumer.member();
+    consumer.key("newSym");
+    consumer.begin_array();
+    for(int i = 0; i < newSym.size(); i++){
+        consumer.string(newSym[i]);
+        consumer.element();
+    }
+    consumer.end_array();
+    consumer.member();
+    consumer.key("direct");
+    consumer.begin_array();
+    for(int i = 0; i < direction.size(); i++){
+        consumer.string(direction[i]);
+        consumer.element();
+    }
+    consumer.end_array();
+    consumer.member();
+    consumer.end_object();
+    consumer.member();
+
+    consumer.end_object();
+
+    const tao::json::value v = std::move(consumer.value);
+
+    f << std::setw(2) << v << "\n";
+    f.close();
+}
+
 void TuringUI::loadSave(TuringSave save){
     alphStr = save.alph;
+
+    needToUpdateTable = false;
+
     commentStr = save.comm;
     fileStr = save.fileName;
 
@@ -584,8 +732,24 @@ void TuringUI::loadSave(TuringSave save){
     for(auto it : save.tape){
         state.tape.setChar(it.first, it.second);
     }
+
     machine.loadState(state);
     this->tableComponent->updateTable(this->alphStr);
+
+    auto alphFind = [&](wchar_t c){
+        for(int i = 0; i < alphStr.size(); i++){
+            if(c == alphStr[i])
+                return i;
+        }
+    };
+
+    auto turnToStr = [](TuringTurn turn){
+        std::wstring r = L"";
+        r += std::wstring{turn.newSymbol};
+        r += pickDirectStr(turn.direction);
+        r += std::to_wstring(turn.newState);
+        return r;
+    };
 
     int cols = -1;
     for(auto it : save.table){
@@ -593,9 +757,10 @@ void TuringUI::loadSave(TuringSave save){
             this->tableComponent->addCol();
             cols++;
         }
+        this->tableComponent->loadSavedCell(alphFind(it.first.second), it.first.first, turnToStr(it.second));
     }
 
 
-
     updateComponents();
+    this->refresh();
 }
