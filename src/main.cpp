@@ -5,14 +5,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "ftxui/component/component.hpp"
-#include "ftxui/component/screen_interactive.hpp"
-#include "ftxui/dom/elements.hpp"
-#include "ftxui/dom/table.hpp"
-#include "ftxui/screen/screen.hpp"
-#include "ftxui/screen/string.hpp"
-#include "ftxui/util/ref.hpp"
-
 #include "turing.hpp"
 #include "turingUI.hpp"
 
