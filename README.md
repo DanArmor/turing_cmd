@@ -1,4 +1,7 @@
 # turing_cmd
+
+[![English version](forReadme/EN-icon.png)](README-EN.md)
+
 Машина Тьюринга с интерфейсом в командной строке.
 
 ![1.gif](forReadme/1.gif)
