@@ -163,8 +163,11 @@ class TuringUI : public ftxui::ComponentBase {
     std::atomic<bool> isShowingHelp = false;
     std::atomic<bool> isErrorFile = false;
 
-    std::atomic<bool> isTriedToSave = false;
-    std::atomic<bool> isTriedToLoad = false;
+    std::atomic<bool> wasTriedToSave = false;
+    enum{
+        INVALID,
+        OK
+    } lastSaveStatus;
 
     bool needToUpdateTable = false;
     std::string alphStr;

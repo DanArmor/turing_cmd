@@ -1,34 +1,34 @@
 # turing_cmd
 
-[![English version](forReadme/EN-icon.png)](README-EN.md)
+[![Русская версия](forReadme/RU-icon.png)](README-RU.md)
 
-Машина Тьюринга с интерфейсом в командной строке.
+Turing machine with TUI
 
 ![1.gif](forReadme/1.gif)
 
-## Возможности:
-- Бесконечная лента
-- Пошаговое выполнение
-- Непрерывное выполнение
-- Сохранение Машины в файл и загрузка из файла.
+## Features:
+- Endless tape
+- Step by step execution
+- Continuous exectuion
+- Save/load from file.
 
-### Пример загрузки и сохранения программы
+### Example of save/load:
 ![2.gif](forReadme/2.gif)
 
-Возможна навигация стрелками и мышкой, выход на Esc. Присутствуют горячие клавиши.
+You can navigate with keyboard arrows or with mouse, exit by Esc. There are hotkeys.
 
-### Полный текст справки
+### Full reference text:
 ![3.png](forReadme/3.png) 
 
-## Известные проблемы:
-- Сохранения с кириллицей и/или широкими символами (греческие и т.п.) работают не всегда корректно (По этой причине в сохранеии лямбда заменена знаком #). Применяйте, пожалуйста, на данный момент числа и латиницу
+## Known issues:
+- Cyrillic and/or widechars (like greek symbols) are working not properly. Use english.
 
-## Сборка:
-Программа имеет две зависимости, указанные в конце Readme, но если у вас имеется CMake - достаточно создать каталог build и запусть run.sh, или запустить CMake/make вручную - файл CMakeLists уже настроен так, чтобы скачать необходимые зависимости.
+## Build:
+There are two deps, but if you have CMake - you're ready to go: make a "build" dir and execute "run.sh".
 
-Примечание: в проекте используется FTXUI версии 2, на момент написания уже существует версия 3
+P.S.: project are working under FTXUI V2.0, but there is V3.0 already
 
-## Спасибо создателям библиотек:
-- [nlohmann/json](https://github.com/nlohmann/json) - работа с JSON (текущая библиотека)
+## Thanks for libraries creators:
+- [nlohmann/json](https://github.com/nlohmann/json) - JSON (are used now)
 - [ArthurSonzogni/FTXUI](https://github.com/ArthurSonzogni/FTXUI) - TUI
-- [taocpp/json](https://github.com/taocpp/json) - работа с JSON (была использована в первой версии)
+- [taocpp/json](https://github.com/taocpp/json) - JSON (was used in first version)
