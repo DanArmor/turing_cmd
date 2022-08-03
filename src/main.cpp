@@ -43,10 +43,10 @@ int main(int argc, char **argv) {
             for(int i = 0; i < oldSym.size(); i++){
                 save.table[std::make_pair(oldSt[i], char(oldSym[i][0]))] = TuringTurn(
                     oldSt[i],
-                    char(oldSym[i][0] == '#' ? TURING_EMPTY : oldSym[i][0]),
+                    oldSym[i][0],
                     newSt[i],
-                    char(newSym[i][0] == '#' ? TURING_EMPTY : newSym[i][0]),
-                    pickDirect(char(direct[i][0]))
+                    newSym[i][0],
+                    pickDirect(direct[i][0])
                 );
             }
             for(int i = 0; i < tapePos.size(); i++){

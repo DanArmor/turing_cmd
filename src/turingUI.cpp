@@ -34,7 +34,7 @@ ftxui::Element TuringCellUI::Render(){
     std::vector<ftxui::Element> elems;
     if(isTop)
         elems.push_back(ftxui::vbox({
-            ftxui::text("Q" + number),
+            ftxui::text("Q" + std::to_string(number)),
             ftxui::separator(),
             input->Render() | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 5)})
         );
@@ -805,5 +805,4 @@ void TuringUI::loadSave(TuringSave save){
 
 
     updateComponents();
-    this->refresh();
 }

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(Turing
   LANGUAGES CXX
+  VERSION 0.2
 )
 
 set(CMAKE_BUILD_TYPE Debug)
@@ -11,7 +12,7 @@ include(FetchContent)
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
   GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
-  GIT_TAG v2.0.0
+  GIT_TAG v3.0.0
 )
 
 FetchContent_Declare(json
