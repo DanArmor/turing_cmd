@@ -707,6 +707,7 @@ void TuringUI::saveToFile(void){
     std::vector<std::string> newSym;
     std::vector<std::string> direction;
     std::vector<TuringTurn> tableTurns = this->tableComponent->getTurns();
+
     for(int i = 0; i < tableTurns.size(); i++){
         oldSt.push_back(tableTurns[i].oldState);
         if(tableTurns[i].oldSymbol == TURING_EMPTY){
@@ -725,87 +726,20 @@ void TuringUI::saveToFile(void){
         direction.push_back(ftxui::to_string(pickDirectStr(tableTurns[i].direction)));
     }
 
-    tao::json::events::to_value consumer;
-    consumer.begin_object();
-    consumer.key("alph");
-    consumer.string(alphToSave);
-    consumer.member();
+    json j;
+    j["alph"] = alphToSave;
+    j["comm"] = commentToSave;
 
-    consumer.key("comm");
-    consumer.string(commentToSave);
-    consumer.member();
+    j["tape"]["pos"] = tapePos;
+    j["tape"]["sym"] = tapeChar;
+    
+    j["table"]["oldSt"] = oldSt;
+    j["table"]["oldSym"] = oldSym;
+    j["table"]["newSt"] = newSt;
+    j["table"]["newSym"] = newSym;
+    j["table"]["direct"] = direction;
 
-    consumer.key("tape");
-    consumer.begin_object();
-    consumer.key("pos");
-    consumer.begin_array();
-    for(int i = 0; i < tapePos.size(); i++){
-        consumer.number(std::int64_t(tapePos[i]));
-        consumer.element();
-    }
-    consumer.end_array();
-    consumer.member();
-    consumer.key("sym");
-    consumer.begin_array();
-    for(int i = 0; i < tapePos.size(); i++){
-        consumer.string(tapeChar[i]);
-        consumer.element();
-    }
-    consumer.end_array();
-    consumer.member();
-    consumer.end_object();
-    consumer.member();
-
-    consumer.key("table");
-    consumer.begin_object();
-    consumer.key("oldSt");
-    consumer.begin_array();
-    for(int i = 0; i < oldSt.size(); i++){
-        consumer.number(std::int64_t(oldSt[i]));
-        consumer.element();
-    }
-    consumer.end_array();
-    consumer.member();
-    consumer.key("oldSym");
-    consumer.begin_array();
-    for(int i = 0; i < oldSym.size(); i++){
-        consumer.string(oldSym[i]);
-        consumer.element();
-    }
-    consumer.end_array();
-    consumer.member();
-    consumer.key("newSt");
-    consumer.begin_array();
-    for(int i = 0; i < newSt.size(); i++){
-        consumer.number(std::int64_t(newSt[i]));
-        consumer.element();
-    }
-    consumer.end_array();
-    consumer.member();
-    consumer.key("newSym");
-    consumer.begin_array();
-    for(int i = 0; i < newSym.size(); i++){
-        consumer.string(newSym[i]);
-        consumer.element();
-    }
-    consumer.end_array();
-    consumer.member();
-    consumer.key("direct");
-    consumer.begin_array();
-    for(int i = 0; i < direction.size(); i++){
-        consumer.string(direction[i]);
-        consumer.element();
-    }
-    consumer.end_array();
-    consumer.member();
-    consumer.end_object();
-    consumer.member();
-
-    consumer.end_object();
-
-    const tao::json::value v = std::move(consumer.value);
-
-    f << std::setw(2) << v << "\n";
+    f << std::setw(2) << j << "\n";
     f.close();
 }
 

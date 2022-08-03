@@ -8,19 +8,9 @@
 #include "turing.hpp"
 #include "turingUI.hpp"
 
-#include "tao/json/contrib/vector_traits.hpp"
-#include "tao/json.hpp"
+#include "nlohmann/json.hpp"
 
-
-template<typename T>
-std::vector<T> getAsArray(const tao::json::value &v, std::string name1, std::string name2){
-    auto V = v.at(name1).at(name2).get_array();
-    std::vector<T> result;
-    for(auto it : V){
-        result.push_back(it.as<T>());
-    }
-    return result;
-}
+using namespace nlohmann;
 
 int main(int argc, char **argv) {
     auto screen = ftxui::ScreenInteractive::TerminalOutput();
@@ -29,18 +19,27 @@ int main(int argc, char **argv) {
         if(argc == 2){
             TuringSave save;
             save.fileName = argv[1];
+            std::ifstream saveFileStream(argv[1]);
+            if(!saveFileStream){
+                std::cout << "Ошибка открытия файла";
+                exit(2);
+            }
 
-            const tao::json::value v = tao::json::from_file(argv[1]);
-            save.comm = v.as<std::string> ("comm");
-            save.alph = TURING_EMPTY_STR + ftxui::to_wstring(v.as<std::string>("alph"));
-            std::vector<int> tapePos = getAsArray<int>(v, "tape", "pos");
-            std::vector<std::string> tapeChar = getAsArray<std::string>(v, "tape", "sym");
+            json j = json::parse(saveFileStream);
 
-            std::vector<std::string> oldSym = getAsArray<std::string>(v, "table", "oldSym");
-            std::vector<int> oldSt = getAsArray<int>(v, "table", "oldSt");
-            std::vector<int> newSt = getAsArray<int>(v, "table", "newSt");
-            std::vector<std::string> newSym = getAsArray<std::string>(v, "table", "newSym");
-            std::vector<std::string> direct = getAsArray<std::string>(v, "table", "direct");
+            save.comm = j["comm"];
+            save.alph = TURING_EMPTY_STR + ftxui::to_wstring(j["alph"].get<std::string>());
+
+
+            auto tapePos = j["tape"]["pos"].get<std::vector<int>>();
+            auto tapeChar = j["tape"]["sym"].get<std::vector<std::string>>();
+
+            auto oldSym = j["table"]["oldSym"].get<std::vector<std::string>>();
+            auto oldSt = j["table"]["oldSt"].get<std::vector<int>>();
+            auto newSt = j["table"]["newSt"].get<std::vector<int>>();
+            auto newSym = j["table"]["newSym"].get<std::vector<std::string>>();
+            auto direct = j["table"]["direct"].get<std::vector<std::string>>();
+
             for(int i = 0; i < oldSym.size(); i++){
                 save.table[std::make_pair(oldSt[i], wchar_t(oldSym[i][0]))] = TuringTurn(
                     oldSt[i],

@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.21)
-project(Turing)
+
+project(Turing
+  LANGUAGES CXX
+)
+
 set(CMAKE_BUILD_TYPE Debug)
 
 include(FetchContent)
@@ -11,8 +15,8 @@ FetchContent_Declare(ftxui
 )
 
 FetchContent_Declare(json
-  GIT_REPOSITORY https://github.com/taocpp/json
-  GIT_TAG 1.0.0-beta.13
+    GIT_REPOSITORY https://github.com/nlohmann/json
+    GIT_TAG v3.10.5
 )
 
 FetchContent_GetProperties(json)
@@ -34,8 +38,12 @@ include_directories(include)
 
 add_library(TuringLib src/turing.cpp)
 add_library(TuringUI src/turingUI.cpp)
-target_link_libraries(TuringUI PRIVATE ftxui::screen ftxui::dom ftxui::component TuringLib taocpp-json)
+#add_library(Utils src/utils.cpp)
+
+target_link_libraries(TuringUI PRIVATE ftxui::screen ftxui::dom ftxui::component TuringLib nlohmann_json::nlohmann_json)
+
+#target_link_libraries(Utils PRIVATE nlohmann_json::nlohmann_json)
 
 add_executable(MAIN src/main.cpp)
 
-target_link_libraries(MAIN PRIVATE ftxui::screen ftxui::dom ftxui::component TuringLib TuringUI taocpp-json)
+target_link_libraries(MAIN PRIVATE ftxui::screen ftxui::dom ftxui::component TuringLib TuringUI nlohmann_json::nlohmann_json)
