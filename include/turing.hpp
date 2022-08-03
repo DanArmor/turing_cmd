@@ -11,19 +11,19 @@
 
 enum TuringDirection { Left, Right, NoMove };
 
-const wchar_t TURING_EMPTY = L'λ';
-const std::wstring TURING_EMPTY_STR{TURING_EMPTY};
+const char TURING_EMPTY = '#';
+const std::string TURING_EMPTY_STR{TURING_EMPTY};
 
 struct TuringTurn {
     TuringTurn();
-    TuringTurn(int oldState, wchar_t oldSymbol, int newState, wchar_t newSymbol,
+    TuringTurn(int oldState, char oldSymbol, int newState, char newSymbol,
                TuringDirection direction);
-    TuringTurn(int newState, wchar_t newSymbol, TuringDirection direction);
+    TuringTurn(int newState, char newSymbol, TuringDirection direction);
     ~TuringTurn();
     int oldState;
-    wchar_t oldSymbol;
+    char oldSymbol;
     int newState;
-    wchar_t newSymbol;
+    char newSymbol;
     TuringDirection direction;
 };
 
@@ -32,21 +32,21 @@ class TuringTape {
     TuringTape();
     ~TuringTape();
 
-    void setChar(int pos, wchar_t c);
-    wchar_t getChar(int pos);
+    void setChar(int pos, char c);
+    char getChar(int pos);
     void clear(void);
 
-    std::map<int, wchar_t> getTapeMap(void);
+    std::map<int, char> getTapeMap(void);
 
    private:
-    std::map<int, wchar_t> tape;
+    std::map<int, char> tape;
     int offset;
 };
 
 struct TuringState {
     TuringState();
     TuringState(std::pair<int, int> posAndState,
-                std::initializer_list<std::pair<int, wchar_t>> chars);
+                std::initializer_list<std::pair<int, char>> chars);
     ~TuringState();
     TuringTape tape;
     int position;
@@ -57,40 +57,40 @@ class TuringMachine {
    public:
     TuringMachine();
     TuringMachine(
-        std::initializer_list<std::pair<std::pair<int, wchar_t>, TuringTurn>>
+        std::initializer_list<std::pair<std::pair<int, char>, TuringTurn>>
             turns);
     ~TuringMachine();
 
     void loadState(TuringState newState);
-    void setAlph(std::wstring str);
+    void setAlph(std::string str);
     void setComment(std::string const &str);
 
     void addTurn(TuringTurn turn);
-    void addTurn(std::pair<int, wchar_t> old, TuringTurn turn);
+    void addTurn(std::pair<int, char> old, TuringTurn turn);
 
     void makeTurn(void);
 
-    wchar_t getCurChar(void);
-    std::wstring getStrView(int from, int to);
+    char getCurChar(void);
+    std::string getStrView(int from, int to);
     TuringTape getTape(void);
 
     int getCurState(void);
     int getCurPosition(void);
-    std::map<std::pair<int, wchar_t>, TuringTurn> &getTable(void);
+    std::map<std::pair<int, char>, TuringTurn> &getTable(void);
 
     bool isDone(void);
     void clear(void);
     void clearTurns(void);
 
    private:
-    std::map<std::pair<int, wchar_t>, TuringTurn> table;
-    std::set<wchar_t> alph;
+    std::map<std::pair<int, char>, TuringTurn> table;
+    std::set<char> alph;
     bool stop = false;
     std::string comment;
     TuringState state;
 };
 
-std::wstring pickDirectStr(TuringDirection direction);
-TuringDirection pickDirect(wchar_t c);
+std::string pickDirectStr(TuringDirection direction);
+TuringDirection pickDirect(char c);
 
 #endif

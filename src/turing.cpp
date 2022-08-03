@@ -8,14 +8,14 @@ TuringTurn::TuringTurn()
       newState(-1),
       newSymbol(TURING_EMPTY),
       direction(NoMove) {}
-TuringTurn::TuringTurn(int oldState, wchar_t oldSymbol, int newState,
-                       wchar_t newSymbol, TuringDirection direction)
+TuringTurn::TuringTurn(int oldState, char oldSymbol, int newState,
+                       char newSymbol, TuringDirection direction)
     : oldState(oldState),
       oldSymbol(oldSymbol),
       newState(newState),
       newSymbol(newSymbol),
       direction(direction) {}
-TuringTurn::TuringTurn(int newState, wchar_t newSymbol, TuringDirection direction)
+TuringTurn::TuringTurn(int newState, char newSymbol, TuringDirection direction)
     : newState(newState), newSymbol(newSymbol), direction(direction) {}
 TuringTurn::~TuringTurn() {}
 
@@ -24,7 +24,7 @@ TuringTurn::~TuringTurn() {}
 TuringTape::TuringTape() {}
 TuringTape::~TuringTape() {}
 
-void TuringTape::setChar(int pos, wchar_t c) {
+void TuringTape::setChar(int pos, char c) {
     if(c == TURING_EMPTY){
         tape.erase(pos);
     } else{
@@ -32,7 +32,7 @@ void TuringTape::setChar(int pos, wchar_t c) {
     }
 }
 
-wchar_t TuringTape::getChar(int pos) {
+char TuringTape::getChar(int pos) {
     if (tape.count(pos) == 0) {
         return TURING_EMPTY;
     } else {
@@ -44,13 +44,13 @@ void TuringTape::clear(void){
     tape.clear();
 }
 
-std::map<int, wchar_t> TuringTape::getTapeMap(void) { return tape; }
+std::map<int, char> TuringTape::getTapeMap(void) { return tape; }
 
 // Turing state section
 
 TuringState::TuringState() {}
 TuringState::TuringState(std::pair<int, int> posAndState,
-                         std::initializer_list<std::pair<int, wchar_t>> chars) {
+                         std::initializer_list<std::pair<int, char>> chars) {
     position = posAndState.first;
     currState = posAndState.second;
     for (auto &p : chars) {
@@ -63,7 +63,7 @@ TuringState::~TuringState() {}
 
 TuringMachine::TuringMachine() {}
 TuringMachine::TuringMachine(
-    std::initializer_list<std::pair<std::pair<int, wchar_t>, TuringTurn>> turns) {
+    std::initializer_list<std::pair<std::pair<int, char>, TuringTurn>> turns) {
     for (auto &p : turns) {
         addTurn(p.first, p.second);
     }
@@ -71,7 +71,7 @@ TuringMachine::TuringMachine(
 TuringMachine::~TuringMachine() {}
 
 void TuringMachine::loadState(TuringState newState) { state = newState; }
-void TuringMachine::setAlph(std::wstring str) {
+void TuringMachine::setAlph(std::string str) {
     alph.clear();
     alph.insert(TURING_EMPTY);
     for (auto c : str) {
@@ -83,11 +83,11 @@ void TuringMachine::setComment(std::string const &str) { comment = str; }
 void TuringMachine::addTurn(TuringTurn turn) {
     table[std::make_pair(turn.oldState, turn.oldSymbol)] = turn;
 }
-void TuringMachine::addTurn(std::pair<int, wchar_t> old, TuringTurn turn) {
+void TuringMachine::addTurn(std::pair<int, char> old, TuringTurn turn) {
     table[old] = turn;
 }
 
-wchar_t TuringMachine::getCurChar(void) {
+char TuringMachine::getCurChar(void) {
     return state.tape.getChar(state.position);
 }
 
@@ -110,15 +110,15 @@ void TuringMachine::makeTurn(void) {
 
 TuringTape TuringMachine::getTape(void) { return state.tape; }
 
-std::wstring TuringMachine::getStrView(int from, int to) {
-    std::wstring out;
+std::string TuringMachine::getStrView(int from, int to) {
+    std::string out;
     for (int i = from; i <= to; i++) {
         out += state.tape.getChar(i);
     }
     return out;
 }
 
-std::map<std::pair<int, wchar_t>, TuringTurn> &TuringMachine::getTable(void) {
+std::map<std::pair<int, char>, TuringTurn> &TuringMachine::getTable(void) {
     return table;
 }
 
@@ -128,7 +128,7 @@ bool TuringMachine::isDone(void) { return stop; }
 void TuringMachine::clear(void) { stop = false; }
 void TuringMachine::clearTurns(void){ table.clear(); }
 
-TuringDirection pickDirect(wchar_t c){
+TuringDirection pickDirect(char c){
     switch (c) {
         case '<':
             return TuringDirection::Left;
@@ -141,14 +141,14 @@ TuringDirection pickDirect(wchar_t c){
     }
 }
 
-std::wstring pickDirectStr(TuringDirection direction) {
+std::string pickDirectStr(TuringDirection direction) {
     switch (direction) {
         case TuringDirection::Left:
-            return L"<";
+            return "<";
         case TuringDirection::Right:
-            return L">";
+            return ">";
         case TuringDirection::NoMove:
-            return L"|";
+            return "|";
         default:
             throw(std::invalid_argument("Неизвестное направление"));
     }

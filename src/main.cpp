@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
             json j = json::parse(saveFileStream);
 
             save.comm = j["comm"];
-            save.alph = TURING_EMPTY_STR + ftxui::to_wstring(j["alph"].get<std::string>());
+            save.alph = TURING_EMPTY_STR + j["alph"].get<std::string>();
 
 
             auto tapePos = j["tape"]["pos"].get<std::vector<int>>();
@@ -41,16 +41,16 @@ int main(int argc, char **argv) {
             auto direct = j["table"]["direct"].get<std::vector<std::string>>();
 
             for(int i = 0; i < oldSym.size(); i++){
-                save.table[std::make_pair(oldSt[i], wchar_t(oldSym[i][0]))] = TuringTurn(
+                save.table[std::make_pair(oldSt[i], char(oldSym[i][0]))] = TuringTurn(
                     oldSt[i],
-                    wchar_t(oldSym[i][0] == '#' ? TURING_EMPTY : oldSym[i][0]),
+                    char(oldSym[i][0] == '#' ? TURING_EMPTY : oldSym[i][0]),
                     newSt[i],
-                    wchar_t(newSym[i][0] == '#' ? TURING_EMPTY : newSym[i][0]),
-                    pickDirect(wchar_t(direct[i][0]))
+                    char(newSym[i][0] == '#' ? TURING_EMPTY : newSym[i][0]),
+                    pickDirect(char(direct[i][0]))
                 );
             }
             for(int i = 0; i < tapePos.size(); i++){
-                save.tape[tapePos[i]] = wchar_t(tapeChar[i][0]);
+                save.tape[tapePos[i]] = char(tapeChar[i][0]);
             }
             ui->loadSave(save);
         } else if(argc != 1){

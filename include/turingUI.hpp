@@ -20,7 +20,7 @@ using namespace nlohmann;
 class TuringCellUI : public ftxui::ComponentBase {
    private:
     int number;
-    std::wstring str;
+    std::string str;
     ftxui::Component input;
     bool isTop = false;
 
@@ -28,7 +28,7 @@ class TuringCellUI : public ftxui::ComponentBase {
     TuringCellUI(int number_);
     TuringCellUI(int number_, bool isTop_);
 
-    void loadSaved(std::wstring str_);
+    void loadSaved(std::string str_);
 
     TuringTurn getTurn();
     bool containStr();
@@ -49,7 +49,7 @@ class TuringRowUI : public ftxui::ComponentBase {
     void addCol();
     void removeCol();
 
-    void loadSavedCell(int i, std::wstring str);
+    void loadSavedCell(int i, std::string str);
 
     TuringTurn getTurn(int i);
     bool containStr(int i);
@@ -61,7 +61,7 @@ class TuringRowUI : public ftxui::ComponentBase {
 
 class TuringTableUI : public ftxui::ComponentBase {
    private:
-    std::wstring alph;
+    std::string alph;
     std::vector<std::shared_ptr<TuringRowUI>> rowsComponents;
 
     int cols(void);
@@ -73,14 +73,14 @@ class TuringTableUI : public ftxui::ComponentBase {
     void removeRow(void);
     void removeCol(void);
 
-    void loadSavedCell(int row, int col, std::wstring str);
+    void loadSavedCell(int row, int col, std::string str);
 
-    void addRow(wchar_t c, bool isTop_);
+    void addRow(char c, bool isTop_);
     void addCol(void);
 
     std::vector<TuringTurn> getTurns(void);
 
-    void updateTable(std::wstring alph_);
+    void updateTable(std::string alph_);
 
     ftxui::Element Render() override;
     bool OnEvent(ftxui::Event) override;
@@ -92,7 +92,7 @@ class TuringTapeUI : public ftxui::ComponentBase {
     int leftIndex;
     int CELL_SIZE = 6;
     int positionAbsolute = 0;
-    std::vector<std::wstring> tapeStrs;
+    std::vector<std::string> tapeStrs;
     std::vector<ftxui::Component> tapeInputs;
 
     int toLocalPos(int pos);
@@ -103,9 +103,9 @@ class TuringTapeUI : public ftxui::ComponentBase {
 
     int getSize(void);
     int getLeftIndex(void);
-    std::vector<std::wstring> &getStrs(void);
+    std::vector<std::string> &getStrs(void);
 
-    void setChar(wchar_t c, int pos);
+    void setChar(char c, int pos);
     void setLeftIndex(int pos);
     void setPositionAbsolute(int pos);
 
@@ -125,15 +125,15 @@ struct TuringUIStatus{
     ftxui::Element Render(){
         switch (status) {
             case START:
-                return ftxui::text(L"Start state") | ftxui::color(ftxui::Color::BlueViolet);
+                return ftxui::text("Start state") | ftxui::color(ftxui::Color::BlueViolet);
             case STEP:
-                return ftxui::text(L"Step") | ftxui::color(ftxui::Color::Green1) | ftxui::blink;
+                return ftxui::text("Step") | ftxui::color(ftxui::Color::Green1) | ftxui::blink;
             case RUNNING_ON:
-                return ftxui::text(L"Running") | ftxui::color(ftxui::Color::Green3);
+                return ftxui::text("Running") | ftxui::color(ftxui::Color::Green3);
             case RUNNING_OFF:
-                return ftxui::text(L"Running") | ftxui::color(ftxui::Color::DarkGreen);
+                return ftxui::text("Running") | ftxui::color(ftxui::Color::DarkGreen);
             case STOP:
-                return ftxui::text(L"Stopped. Need to reset") | ftxui::color(ftxui::Color::Red1);
+                return ftxui::text("Stopped. Need to reset") | ftxui::color(ftxui::Color::Red1);
             default:
                 throw std::invalid_argument("Неизвестный статус");
         }
@@ -143,9 +143,9 @@ struct TuringUIStatus{
 struct TuringSave{
     std::string fileName;
     std::string comm;
-    std::wstring alph;
-    std::map<std::pair<int, wchar_t>, TuringTurn> table;
-    std::map<int, wchar_t> tape;
+    std::string alph;
+    std::map<std::pair<int, char>, TuringTurn> table;
+    std::map<int, char> tape;
 };
 
 class TuringUI : public ftxui::ComponentBase {
@@ -163,8 +163,11 @@ class TuringUI : public ftxui::ComponentBase {
     std::atomic<bool> isShowingHelp = false;
     std::atomic<bool> isErrorFile = false;
 
+    std::atomic<bool> isTriedToSave = false;
+    std::atomic<bool> isTriedToLoad = false;
+
     bool needToUpdateTable = false;
-    std::wstring alphStr;
+    std::string alphStr;
     std::string commentStr, fileStr;
     TuringUIStatus status;
 

@@ -4,11 +4,11 @@
 #include <fstream>
 
 
-TuringCellUI::TuringCellUI(int number_) : number(number_) { input = ftxui::Input(&str, L""); Add(input);}
-TuringCellUI::TuringCellUI(int number_, bool isTop_) : isTop(isTop_), number(number_) { input = ftxui::Input(&str, L""); Add(input);}
+TuringCellUI::TuringCellUI(int number_) : number(number_) { input = ftxui::Input(&str, ""); Add(input);}
+TuringCellUI::TuringCellUI(int number_, bool isTop_) : isTop(isTop_), number(number_) { input = ftxui::Input(&str, ""); Add(input);}
 
 TuringTurn TuringCellUI::getTurn(){
-    wchar_t newSymbol = TURING_EMPTY;
+    char newSymbol = TURING_EMPTY;
     int newState = -1;
     TuringDirection direction = TuringDirection::NoMove;
     int whereToPickFrom = 0;
@@ -34,7 +34,7 @@ ftxui::Element TuringCellUI::Render(){
     std::vector<ftxui::Element> elems;
     if(isTop)
         elems.push_back(ftxui::vbox({
-            ftxui::text(L"Q" + std::to_wstring(number)),
+            ftxui::text("Q" + number),
             ftxui::separator(),
             input->Render() | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 5)})
         );
@@ -48,7 +48,7 @@ bool TuringCellUI::OnEvent(ftxui::Event event){
     return this->ChildAt(0)->OnEvent(event);
 }
 
-void TuringCellUI::loadSaved(std::wstring str_){
+void TuringCellUI::loadSaved(std::string str_){
     this->str = str_;
 }
 
@@ -93,7 +93,7 @@ bool TuringRowUI::OnEvent(ftxui::Event event){
     return this->ChildAt(0)->OnEvent(event);
 }
 
-void TuringRowUI::loadSavedCell(int col, std::wstring str){
+void TuringRowUI::loadSavedCell(int col, std::string str){
     this->cells[col]->loadSaved(str);
 }
 
@@ -106,7 +106,7 @@ ftxui::Element TuringTableUI::Render() {
     std::vector<ftxui::Element> elems;
     for(int i = 0; i < rowsComponents.size(); i++){
         elems.push_back(ftxui::hbox({
-            ftxui::text(std::wstring{alph[i]}), rowsComponents[i]->Render()
+            ftxui::text(std::string{alph[i]}), rowsComponents[i]->Render()
         }));
     }
     return ftxui::vbox(elems) | ftxui::frame;
@@ -149,7 +149,7 @@ std::vector<TuringTurn> TuringTableUI::getTurns(void){
     return turns;
 }
 
-void TuringTableUI::addRow(wchar_t c, bool isTop_) {
+void TuringTableUI::addRow(char c, bool isTop_) {
     rowsComponents.push_back(ftxui::Make<TuringRowUI>(isTop_));
     ChildAt(0)->Add(rowsComponents.back());
 }
@@ -160,7 +160,7 @@ void TuringTableUI::addCol(void) {
     }
 }
 
-void TuringTableUI::updateTable(std::wstring alph_){
+void TuringTableUI::updateTable(std::string alph_){
     ChildAt(0)->DetachAllChildren();
     rowsComponents.clear();
     for(int i = 0; i < alph_.size(); i++){
@@ -169,7 +169,7 @@ void TuringTableUI::updateTable(std::wstring alph_){
     alph = alph_;
 }
 
-void TuringTableUI::loadSavedCell(int row, int col, std::wstring str){
+void TuringTableUI::loadSavedCell(int row, int col, std::string str){
     this->rowsComponents[row]->loadSavedCell(col, str);
 }
 
@@ -194,16 +194,16 @@ bool TuringTapeUI::isValidPos(int pos) {
 
 int TuringTapeUI::toLocalPos(int pos) { return pos - leftIndex; }
 
-void TuringTapeUI::setChar(wchar_t c, int pos) {
+void TuringTapeUI::setChar(char c, int pos) {
     if (!isValidPos(pos)) return;
     pos = toLocalPos(pos);
     if(c == TURING_EMPTY)
-        tapeStrs[pos] = L"";
+        tapeStrs[pos] = "";
     else
         tapeStrs[pos] = c;
 }
 
-std::vector<std::wstring> &TuringTapeUI::getStrs(void) { return tapeStrs;}
+std::vector<std::string> &TuringTapeUI::getStrs(void) { return tapeStrs;}
 
 void TuringTapeUI::setPositionAbsolute(int pos) { positionAbsolute = pos; }
 
@@ -213,8 +213,8 @@ ftxui::Element TuringTapeUI::Render() {
         if (x + this->leftIndex == this->positionAbsolute) {
             return ftxui::vbox(
                 {elem,
-                 ftxui::text(L" ▲ ") | ftxui::color(ftxui::Color::DarkOrange3),
-                 ftxui::text(L" | ") |
+                 ftxui::text(" ▲ ") | ftxui::color(ftxui::Color::DarkOrange3),
+                 ftxui::text(" | ") |
                      ftxui::color(ftxui::Color::DarkOrange3)});
         } else {
             return elem;
@@ -222,7 +222,7 @@ ftxui::Element TuringTapeUI::Render() {
     };
     for (int i = 0; i < size; i++) {
         cells.push_back(
-            ftxui::vbox({ftxui::text(std::to_wstring(leftIndex + i)) |
+            ftxui::vbox({ftxui::text(std::to_string(leftIndex + i)) |
                              ftxui::color(ftxui::Color::DarkOrange),
                          ftxui::separatorHeavy(),
                          tapeCursor(i, tapeInputs[i]->Render())}) |
@@ -396,7 +396,7 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
     alphInputOption.on_change = [this](void) {
         this->needToUpdateTable = true;
     };
-    alphInput = ftxui::Input(&alphStr, L"", alphInputOption);
+    alphInput = ftxui::Input(&alphStr, "", alphInputOption);
     commentInput = ftxui::Input(&commentStr, "");
 
     addButton = ftxui::Button("Add", [&]() { this->tableComponent->addCol(); });
@@ -434,7 +434,7 @@ ftxui::Element TuringUI::Render() {
             status.status = s;
             return status.Render();
         };
-        return ftxui::window(ftxui::text(L"Машина Тьюринга - справка") | ftxui::bold,
+        return ftxui::window(ftxui::text("Машина Тьюринга - справка") | ftxui::bold,
         ftxui::vbox({
             toHelpDisplay->Render() | ftxui::color(ftxui::Color::Red) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 10),
             ftxui::paragraphAlignLeft("Данная программа предназначена для работы с Машиной Тьюринга."),
@@ -454,31 +454,31 @@ ftxui::Element TuringUI::Render() {
             ftxui::hbox({
                 ftxui::vbox({
                     ftxui::vbox({
-                        ftxui::text(L"Начальное состояние программы"),
+                        ftxui::text("Начальное состояние программы"),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::START)
                     }) | ftxui::border,
                     ftxui::vbox({
-                        ftxui::text(L"Исполнение по шагам"),
+                        ftxui::text("Исполнение по шагам"),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::STEP)
                     }) | ftxui::border
                 }),
                 ftxui::vbox({
                     ftxui::vbox({
-                        ftxui::text(L"Непрерывное исполнение. В процессе"),
+                        ftxui::text("Непрерывное исполнение. В процессе"),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::RUNNING_ON)
                     }) | ftxui::border,
                     ftxui::vbox({
-                        ftxui::text(L"Непрерывное исполнение. Пауза"),
+                        ftxui::text("Непрерывное исполнение. Пауза"),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::RUNNING_OFF)
                     }) | ftxui::border,
                 }),
                     ftxui::vbox({
-                        ftxui::text(L"Остановка в случае достижения"),
-                        ftxui::text(L"конечного состояния. Требуется сброс"),
+                        ftxui::text("Остановка в случае достижения"),
+                        ftxui::text("конечного состояния. Требуется сброс"),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::STOP)
                     }) | ftxui::border,
@@ -491,36 +491,36 @@ ftxui::Element TuringUI::Render() {
             ftxui::paragraphAlignLeft("Формат сохранений json. При необходимости, вы можете редактировать их вручную, соблюдая структуру"),
             ftxui::paragraphAlignLeft("Для примера структуры попробуйте сохранить одну из своих Машин"),
             ftxui::text(""),
-            ftxui::text(L"Символ " + TURING_EMPTY_STR + L" обозначает <пустой> символ Машины."),
+            ftxui::text("Символ " + TURING_EMPTY_STR + " обозначает <пустой> символ Машины."),
             ftxui::paragraphAlignLeft("Кнопки слева и справ от ленты перемещают ваше поле зрение на 5 ячеек."),
             ftxui::hbox({
                 ftxui::vbox({
                     ftxui::vbox({
-                        ftxui::text(L"Шаг выполнения машины"),
+                        ftxui::text("Шаг выполнения машины"),
                         ftxui::separator(),
-                        ftxui::text(L"Step") | ftxui::color(ftxui::Color::SkyBlue1)
+                        ftxui::text("Step") | ftxui::color(ftxui::Color::SkyBlue1)
                     }) | ftxui::border,
                     ftxui::vbox({
-                        ftxui::text(L"Запуск непрерывного выполнения"),
+                        ftxui::text("Запуск непрерывного выполнения"),
                         ftxui::separator(),
-                        ftxui::text(L"Run") | ftxui::color(ftxui::Color::SkyBlue1)
+                        ftxui::text("Run") | ftxui::color(ftxui::Color::SkyBlue1)
                     }) | ftxui::border
                 }),
                 ftxui::vbox({
                     ftxui::vbox({
-                        ftxui::text(L"Пауза непрерывного выполнения"),
+                        ftxui::text("Пауза непрерывного выполнения"),
                         ftxui::separator(),
-                        ftxui::text(L"Run") | ftxui::color(ftxui::Color::DarkRed)
+                        ftxui::text("Run") | ftxui::color(ftxui::Color::DarkRed)
                     }) | ftxui::border,
                     ftxui::vbox({
-                        ftxui::text(L"Сброс в первоначальное состояние"),
+                        ftxui::text("Сброс в первоначальное состояние"),
                         ftxui::separator(),
-                        ftxui::text(L"Reset") | ftxui::color(ftxui::Color::SkyBlue1)
+                        ftxui::text("Reset") | ftxui::color(ftxui::Color::SkyBlue1)
                     }) | ftxui::border
 
                 })
             }),
-            ftxui::text(L"В поле алфавита вводите символы после " + TURING_EMPTY_STR),
+            ftxui::text("В поле алфавита вводите символы после " + TURING_EMPTY_STR),
             ftxui::paragraphAlignLeft("При изменении алфавита таблица полностью сбрасывается - запишите полностью алфавит заранее."),
             ftxui::text(""),
             ftxui::paragraphAlignLeft("Поле комментария служит для заметок пользователя"),
@@ -564,10 +564,10 @@ ftxui::Element TuringUI::Render() {
             {stepButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
             runButton->Render() | runButtonColor(),
             resetButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
-            ftxui::vbox({ftxui::text(L"Алфавит"), ftxui::separatorLight(),
+            ftxui::vbox({ftxui::text("Алфавит"), ftxui::separatorLight(),
                         alphInput->Render()}) |
                 ftxui::borderLight,
-            ftxui::vbox({ftxui::text(L"Комментарий"), ftxui::separatorLight(),
+            ftxui::vbox({ftxui::text("Комментарий"), ftxui::separatorLight(),
                         commentInput->Render()}) |
                 ftxui::borderLight});
 
@@ -575,7 +575,7 @@ ftxui::Element TuringUI::Render() {
             ftxui::hbox({addButton->Render() | ftxui::color(ftxui::Color::Green),
                         removeButton->Render() | ftxui::color(ftxui::Color::Red),
                         ftxui::vbox({
-                            ftxui::text(L"Текущее состояние"), ftxui::separatorLight(), ftxui::text(std::to_string(machine.getCurState()))
+                            ftxui::text("Текущее состояние"), ftxui::separatorLight(), ftxui::text(std::to_string(machine.getCurState()))
                             }) | ftxui::borderLight
                         });
         auto fileErrRender = [&](){
@@ -586,12 +586,12 @@ ftxui::Element TuringUI::Render() {
             }
         };
         auto mainBox =
-            ftxui::vbox({ftxui::vbox({ftxui::text(L"Машина Тьюринга") | ftxui::bold,
+            ftxui::vbox({ftxui::vbox({ftxui::text("Машина Тьюринга") | ftxui::bold,
             ftxui::hbox({status.Render() | ftxui::border,
             helpButton->Render()
             | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 6)
             | ftxui::color(ftxui::Color::Yellow1),
-            ftxui::vbox({ftxui::text(L"Имя файла"), fileInput->Render()}) | ftxui::border}),
+            ftxui::vbox({ftxui::text("Имя файла"), fileInput->Render()}) | ftxui::border}),
             fileErrRender() | ftxui::color(ftxui::Color::Red)
             }),
                         ftxui::separatorHeavy(), tapeAndButtons, mainControl,
@@ -688,7 +688,7 @@ void TuringUI::saveToFile(void){
         this->refresh();
 	}
 
-    auto alphToSave = ftxui::to_string(this->alphStr.substr(1));
+    auto alphToSave = this->alphStr.substr(1);
     auto commentToSave = this->commentStr;
     std::vector<int> tapePos;
     std::vector<std::string> tapeChar;
@@ -698,7 +698,7 @@ void TuringUI::saveToFile(void){
     }
     for(auto it : this->state.tape.getTapeMap()){
         tapePos.push_back(it.first);
-        tapeChar.push_back(ftxui::to_string(std::wstring({it.second})));
+        tapeChar.push_back(std::string({it.second}));
     }
 
     std::vector<int> oldSt;
@@ -713,17 +713,17 @@ void TuringUI::saveToFile(void){
         if(tableTurns[i].oldSymbol == TURING_EMPTY){
             oldSym.push_back("#");
         }else{
-            oldSym.push_back(ftxui::to_string(std::wstring({tableTurns[i].oldSymbol})));
+            oldSym.push_back(std::string({tableTurns[i].oldSymbol}));
         }
 
         if(tableTurns[i].newSymbol == TURING_EMPTY){
             newSym.push_back("#");
         }else{
-            newSym.push_back(ftxui::to_string(std::wstring({tableTurns[i].newSymbol})));
+            newSym.push_back(std::string({tableTurns[i].newSymbol}));
         }
 
         newSt.push_back(tableTurns[i].newState);
-        direction.push_back(ftxui::to_string(pickDirectStr(tableTurns[i].direction)));
+        direction.push_back(pickDirectStr(tableTurns[i].direction));
     }
 
     json j;
@@ -760,7 +760,7 @@ void TuringUI::loadSave(TuringSave save){
     machine.loadState(state);
     this->tableComponent->updateTable(this->alphStr);
 
-    auto alphFind = [&](wchar_t c){
+    auto alphFind = [&](char c){
         for(int i = 0; i < alphStr.size(); i++){
             if(c == alphStr[i])
                 return i;
@@ -768,10 +768,10 @@ void TuringUI::loadSave(TuringSave save){
     };
 
     auto turnToStr = [](TuringTurn turn){
-        std::wstring r = L"";
-        r += std::wstring{turn.newSymbol};
+        std::string r = "";
+        r += std::string{turn.newSymbol};
         r += pickDirectStr(turn.direction);
-        r += std::to_wstring(turn.newState);
+        r += std::to_string(turn.newState);
         return r;
     };
 
