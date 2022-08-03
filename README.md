@@ -26,5 +26,6 @@
 Примечание: в проекте используется FTXUI версии 2, на момент написания уже существует версия 3
 
 ## Спасибо создателям библиотек:
-- [taocpp/json](https://github.com/taocpp/json) - работа с JSON
+- [nlohmann/json](https://github.com/nlohmann/json) - работа с JSON (текущая библиотека)
 - [ArthurSonzogni/FTXUI](https://github.com/ArthurSonzogni/FTXUI) - TUI
+- [taocpp/json](https://github.com/taocpp/json) - работа с JSON (была использована в первой версии)
