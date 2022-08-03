@@ -388,6 +388,12 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
             this->updateComponents();
         }
         this->saveToFile();
+        if(this->isErrorFile){
+            this->lastSaveStatus = SaveStatus::INVALID;
+        } else{
+            this->lastSaveStatus = SaveStatus::OK;
+        }
+        this->wasTriedToSave = true;
     };
     fileInput = ftxui::Input(&fileStr, "", saveOption);
 
@@ -578,21 +584,34 @@ ftxui::Element TuringUI::Render() {
                             ftxui::text("Текущее состояние"), ftxui::separatorLight(), ftxui::text(std::to_string(machine.getCurState()))
                             }) | ftxui::borderLight
                         });
-        auto fileErrRender = [&](){
-            if(this->isErrorFile){
-                return ftxui::text("Ошибка при работе с файлом! Состояние не сохранено на диск") | ftxui::borderDouble;
+
+        auto fileStatusRenderer = [&](){
+            if(this->wasTriedToSave){
+                std::thread fileStatusUpdate([&]{
+                    using namespace std::chrono_literals;
+                    const auto refresh_time = 2.0s;
+                    this->wasTriedToSave = false;
+                    std::this_thread::sleep_for(refresh_time);
+                    this->refresh();
+                });
+                fileStatusUpdate.detach();
+                if(this->lastSaveStatus == SaveStatus::OK){
+                    return ftxui::text("Файл сохранен успешно") | ftxui::color(ftxui::Color::Green1);
+                } else if(this->lastSaveStatus == SaveStatus::INVALID){
+                    return ftxui::text("Ошибка при попытке сохранения файла") | ftxui::color(ftxui::Color::Red1);
+                }
             } else{
-                return ftxui::vbox({});
+                return ftxui::text("Имя файла");
             }
         };
+
         auto mainBox =
             ftxui::vbox({ftxui::vbox({ftxui::text("Машина Тьюринга") | ftxui::bold,
             ftxui::hbox({status.Render() | ftxui::border,
             helpButton->Render()
             | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 6)
             | ftxui::color(ftxui::Color::Yellow1),
-            ftxui::vbox({ftxui::text("Имя файла"), fileInput->Render()}) | ftxui::border}),
-            fileErrRender() | ftxui::color(ftxui::Color::Red)
+            ftxui::vbox({fileStatusRenderer(), fileInput->Render()}) | ftxui::border}),
             }),
                         ftxui::separatorHeavy(), tapeAndButtons, mainControl,
                         buttonsTable, tableComponent->Render()}) |

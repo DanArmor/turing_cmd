@@ -164,7 +164,7 @@ class TuringUI : public ftxui::ComponentBase {
     std::atomic<bool> isErrorFile = false;
 
     std::atomic<bool> wasTriedToSave = false;
-    enum{
+    enum SaveStatus{
         INVALID,
         OK
     } lastSaveStatus;
