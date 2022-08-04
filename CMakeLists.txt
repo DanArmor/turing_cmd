@@ -45,6 +45,5 @@ target_link_libraries(TuringUI PRIVATE ftxui::screen ftxui::dom ftxui::component
 
 #target_link_libraries(Utils PRIVATE nlohmann_json::nlohmann_json)
 
-add_executable(MAIN src/main.cpp)
-
-target_link_libraries(MAIN PRIVATE ftxui::screen ftxui::dom ftxui::component TuringLib TuringUI nlohmann_json::nlohmann_json)
+add_executable(turing-cmd src/main.cpp)
+target_link_libraries(turing-cmd PRIVATE ftxui::screen ftxui::dom ftxui::component TuringLib TuringUI nlohmann_json::nlohmann_json)

@@ -33,6 +33,7 @@
 *.json
 
 MAIN
+turing-cmd
 
 **/build
 **/.vscode
