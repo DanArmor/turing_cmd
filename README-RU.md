@@ -10,10 +10,10 @@
 
 ## Table of contents
 - [turing_cmd](#turing-cmd)
-  * [Возможности:](#features)
-    + [Пример загрузки и сохранения программы:](#example-of-save-load)
-    + [Полный текст справки:](#full-reference-text)
-  * [Известные проблемы:](#known-issues)
+  * [Возможности](#features)
+    + [Пример загрузки и сохранения программы](#example-of-save-load)
+    + [Полный текст справки](#full-reference-text)
+  * [Известные проблемы](#known-issues)
   * [Установка](#installation)
     + [Ubuntu/Debian](#ubuntu-debian)
   * [Сборка](#build)
