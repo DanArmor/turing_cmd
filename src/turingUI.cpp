@@ -1,6 +1,7 @@
 #include "turingUI.hpp"
 
 #include <chrono>
+#include <sstream>
 #include <fstream>
 
 
@@ -293,6 +294,13 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
             this->isShowingHelp = true;
         }
     });
+    localeButton = ftxui::Button("Change lang", [&](){
+        if(this->language == LANG::L_EN){
+            this->language = LANG::L_RU;
+        } else{
+            this->language = LANG::L_EN;
+        }
+    });
     
     moveTapeLeftButton = ftxui::Button("←Move", [&]() {
         if(this->isResetState){
@@ -413,17 +421,19 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
     tableComponent = ftxui::Make<TuringTableUI>();
 
     toMainDisplay = ftxui::Container::Vertical(
-        {ftxui::Container::Horizontal({helpButton, fileInput}),
+        {ftxui::Container::Horizontal({helpButton, fileInput, localeButton}),
          ftxui::Container::Horizontal(
              {moveTapeLeftButton, tapeComponent, moveTapeRightButton}),
          ftxui::Container::Horizontal(
              {stepButton, runButton, resetButton, alphInput, commentInput}),
          ftxui::Container::Horizontal({addButton, removeButton}),
          tableComponent});
-    toHelpDisplay = ftxui::Button("Close help", [&]{
+    toHelpDisplay = ftxui::Container::Horizontal({ftxui::Button("Close help", [&]{
         this->DetachAllChildren();
         this->Add(toMainDisplay);
         this->isShowingHelp = false;
+    }),
+        localeButton
     });
     Add(toMainDisplay);
 }
@@ -440,102 +450,78 @@ ftxui::Element TuringUI::Render() {
             status.status = s;
             return status.Render();
         };
-        return ftxui::window(ftxui::text("Машина Тьюринга - справка") | ftxui::bold,
+        return ftxui::window(ftxui::text(getText("Title_help")) | ftxui::bold,
         ftxui::vbox({
-            toHelpDisplay->Render() | ftxui::color(ftxui::Color::Red) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 10),
-            ftxui::paragraphAlignLeft("Данная программа предназначена для работы с Машиной Тьюринга."),
-            ftxui::paragraphAlignLeft("Горячие клавиши:"),
-            ftxui::paragraphAlignLeft("CTRL-LEFT - сместиться по ленте на 5 ячеек влево"),
-            ftxui::paragraphAlignLeft("CTRL-RIGHT - сместиться по ленте на 5 ячеек вправо"),
-            ftxui::paragraphAlignLeft("CTRL-UP - добавить новое состояние в таблицу"),
-            ftxui::paragraphAlignLeft("CTRL-DOWN - убрать последнее состояние из таблицы"),
-            ftxui::paragraphAlignLeft("F5 - шаг выполнения"),
-            ftxui::paragraphAlignLeft("F6 - запуск/пауза непрерывного выполнения"),
-            ftxui::paragraphAlignLeft("F7 - возврат в изначальное состояние"),
-            ftxui::paragraphAlignLeft("F9 - справка"),
-            ftxui::paragraphAlignLeft("F10 - сохранить машину в файл"),
-            ftxui::paragraphAlignLeft(""),
-            ftxui::paragraphAlignLeft("Слева сверху располагается индикатор состояния программы"),
-            ftxui::paragraphAlignLeft("Возможны следующие состояния программы"),
+            ftxui::hbox({
+                toHelpDisplay->Render() | ftxui::color(ftxui::Color::Red) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 30)
+            }),
+            breakByLinesElement(
+                getText("Help_1")
+            ),
             ftxui::hbox({
                 ftxui::vbox({
                     ftxui::vbox({
-                        ftxui::text("Начальное состояние программы"),
+                        ftxui::text(getText("Help_state_start")),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::START)
                     }) | ftxui::border,
                     ftxui::vbox({
-                        ftxui::text("Исполнение по шагам"),
+                        ftxui::text(getText("Help_state_step")),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::STEP)
                     }) | ftxui::border
                 }),
                 ftxui::vbox({
                     ftxui::vbox({
-                        ftxui::text("Непрерывное исполнение. В процессе"),
+                        ftxui::text(getText("Help_state_running_in_process")),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::RUNNING_ON)
                     }) | ftxui::border,
                     ftxui::vbox({
-                        ftxui::text("Непрерывное исполнение. Пауза"),
+                        ftxui::text(getText("Help_state_running_pause")),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::RUNNING_OFF)
                     }) | ftxui::border,
                 }),
                     ftxui::vbox({
-                        ftxui::text("Остановка в случае достижения"),
-                        ftxui::text("конечного состояния. Требуется сброс"),
+                        ftxui::text(getText("Help_state_stop")),
                         ftxui::separator(),
                         toShowStatus(TuringUIStatus::STOP)
                     }) | ftxui::border,
             }),
-            ftxui::paragraphAlignLeft("Правее кнопки справки находится поле для ввода имени файла."),
-            ftxui::paragraphAlignLeft("При нажатии кнопки Enter будет произведено сохранение текущей таблицы состояний."),
-            ftxui::paragraphAlignLeft("и ленты в состоянии Start state в файл, а так же комментарий"),
-            ftxui::text(""),
-            ftxui::paragraphAlignLeft("Для загрузки Машины Тьюринга из файла выйдите из программы и запустите, указав имя файла после имени программы."),
-            ftxui::paragraphAlignLeft("Формат сохранений json. При необходимости, вы можете редактировать их вручную, соблюдая структуру"),
-            ftxui::paragraphAlignLeft("Для примера структуры попробуйте сохранить одну из своих Машин"),
-            ftxui::text(""),
-            ftxui::text("Символ " + TURING_EMPTY_STR + " обозначает <пустой> символ Машины."),
-            ftxui::paragraphAlignLeft("Кнопки слева и справ от ленты перемещают ваше поле зрение на 5 ячеек."),
+            breakByLinesElement(
+                getText("Help_2")
+            ),
             ftxui::hbox({
                 ftxui::vbox({
                     ftxui::vbox({
-                        ftxui::text("Шаг выполнения машины"),
+                        ftxui::text(getText("Help_button_step")),
                         ftxui::separator(),
                         ftxui::text("Step") | ftxui::color(ftxui::Color::SkyBlue1)
                     }) | ftxui::border,
                     ftxui::vbox({
-                        ftxui::text("Запуск непрерывного выполнения"),
+                        ftxui::text(getText("Help_button_run")),
                         ftxui::separator(),
                         ftxui::text("Run") | ftxui::color(ftxui::Color::SkyBlue1)
                     }) | ftxui::border
                 }),
                 ftxui::vbox({
                     ftxui::vbox({
-                        ftxui::text("Пауза непрерывного выполнения"),
+                        ftxui::text("Help_button_pause"),
                         ftxui::separator(),
                         ftxui::text("Run") | ftxui::color(ftxui::Color::DarkRed)
                     }) | ftxui::border,
                     ftxui::vbox({
-                        ftxui::text("Сброс в первоначальное состояние"),
+                        ftxui::text("Help_button_reset"),
                         ftxui::separator(),
                         ftxui::text("Reset") | ftxui::color(ftxui::Color::SkyBlue1)
                     }) | ftxui::border
 
                 })
             }),
-            ftxui::text("В поле алфавита вводите символы после " + TURING_EMPTY_STR),
-            ftxui::paragraphAlignLeft("При изменении алфавита таблица полностью сбрасывается - запишите полностью алфавит заранее."),
-            ftxui::text(""),
-            ftxui::paragraphAlignLeft("Поле комментария служит для заметок пользователя"),
-            ftxui::text(""),
-            ftxui::paragraphAlignLeft("Ниже находится таблица состояний и индикатор текущего состояния."),
-            ftxui::paragraphAlignLeft("Добавление и удаление новых состояний кнопками Add и Remove не влияет на имеющиеся записи таблицы состояний"),
-            ftxui::paragraphAlignLeft("Слева указаны символы алфавита, сверху - номер состояния."),
-            ftxui::paragraphAlignLeft("На пересечении вписывается символ, который необходимо поставить, направление движения головки и новое состояние"),
-            ftxui::paragraphAlignLeft("Пример. При встрече пустого символа в состоянии 0 поставить символ 1, сдвинуть головку влево и перейти в состояние 0"),
+            breakByLinesElement(
+                getText("Help_3")
+            ),
             ftxui::vbox(
                 ftxui::text("Q0"),
                 ftxui::hbox({
@@ -543,12 +529,9 @@ ftxui::Element TuringUI::Render() {
                     ftxui::hbox({ftxui::text("1<0")}) | ftxui::border
                 })
             ),
-            ftxui::paragraphAlignLeft("Возможные движения головки: < влево, > вправо, | не двигаться"),
-            ftxui::paragraphAlignLeft("Отсутствие символа для установки в ячейке означает, что поставится пустой символ"),
-            ftxui::paragraphAlignLeft("Отсутствие нового состояния в записи таблицы обозначает переход в конечное состояние (-1)"),
-            ftxui::text(""),
-            ftxui::paragraphAlignLeft("Пример. Установить пустой символ, сдвинуться влево и перейти в конечное состояние: \"<\""),
-            ftxui::paragraphAlignLeft("Отсутствие указаний к действию при определенной комбинации в таблице переходов означает <поставить пустой символ, не двигаться и перейти в конечное состояние>"),
+            breakByLinesElement(
+                getText("Help_4")
+            )
         }) | ftxui::yframe
         );
     } else{
@@ -570,10 +553,10 @@ ftxui::Element TuringUI::Render() {
             {stepButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
             runButton->Render() | runButtonColor(),
             resetButton->Render() | ftxui::color(ftxui::Color::SkyBlue1),
-            ftxui::vbox({ftxui::text("Алфавит"), ftxui::separatorLight(),
+            ftxui::vbox({ftxui::text("Alphabet"), ftxui::separatorLight(),
                         alphInput->Render()}) |
                 ftxui::borderLight,
-            ftxui::vbox({ftxui::text("Комментарий"), ftxui::separatorLight(),
+            ftxui::vbox({ftxui::text("Comment"), ftxui::separatorLight(),
                         commentInput->Render()}) |
                 ftxui::borderLight});
 
@@ -581,7 +564,7 @@ ftxui::Element TuringUI::Render() {
             ftxui::hbox({addButton->Render() | ftxui::color(ftxui::Color::Green),
                         removeButton->Render() | ftxui::color(ftxui::Color::Red),
                         ftxui::vbox({
-                            ftxui::text("Текущее состояние"), ftxui::separatorLight(), ftxui::text(std::to_string(machine.getCurState()))
+                            ftxui::text("Current state"), ftxui::separatorLight(), ftxui::text(std::to_string(machine.getCurState()))
                             }) | ftxui::borderLight
                         });
 
@@ -596,22 +579,23 @@ ftxui::Element TuringUI::Render() {
                 });
                 fileStatusUpdate.detach();
                 if(this->lastSaveStatus == SaveStatus::OK){
-                    return ftxui::text("Файл сохранен успешно") | ftxui::color(ftxui::Color::Green1);
+                    return ftxui::text("Saving is done") | ftxui::color(ftxui::Color::Green1);
                 } else if(this->lastSaveStatus == SaveStatus::INVALID){
-                    return ftxui::text("Ошибка при попытке сохранения файла") | ftxui::color(ftxui::Color::Red1);
+                    return ftxui::text("Error during saving") | ftxui::color(ftxui::Color::Red1);
                 }
             } else{
-                return ftxui::text("Имя файла");
+                return ftxui::text("File name");
             }
         };
 
         auto mainBox =
-            ftxui::vbox({ftxui::vbox({ftxui::text("Машина Тьюринга") | ftxui::bold,
-            ftxui::hbox({status.Render() | ftxui::border,
-            helpButton->Render()
-            | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 6)
-            | ftxui::color(ftxui::Color::Yellow1),
-            ftxui::vbox({fileStatusRenderer(), fileInput->Render()}) | ftxui::border}),
+            ftxui::vbox({ftxui::vbox({ftxui::text("Turing machine") | ftxui::bold,
+                ftxui::hbox({status.Render() | ftxui::border,
+                    helpButton->Render()
+                    | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 6)
+                    | ftxui::color(ftxui::Color::Yellow1),
+                    ftxui::vbox({fileStatusRenderer(), fileInput->Render()}) | ftxui::border
+                })
             }),
                         ftxui::separatorHeavy(), tapeAndButtons, mainControl,
                         buttonsTable, tableComponent->Render()}) |
@@ -762,6 +746,10 @@ void TuringUI::saveToFile(void){
     f.close();
 }
 
+std::string &TuringUI::getText(std::string const &key){
+    return locale_getText(key, language);
+}
+
 void TuringUI::loadSave(TuringSave save){
     alphStr = save.alph;
 
@@ -805,4 +793,23 @@ void TuringUI::loadSave(TuringSave save){
 
 
     updateComponents();
+}
+
+std::vector<std::string> TuringUI::breakByLines(std::string str){
+    std::istringstream ss(str);
+    std::string t;
+    std::vector<std::string> res;
+    while(getline(ss, t)){
+        res.push_back(t);
+    }
+    return res;
+}
+
+ftxui::Element TuringUI::breakByLinesElement(std::string str){
+    std::vector<std::string> strs = breakByLines(str);
+    ftxui::Elements list;
+    for(int i = 0; i < strs.size(); i++){
+        list.push_back(ftxui::hbox({ftxui::paragraph(strs[i])}) | ftxui::flex);
+    }
+    return ftxui::vbox(list) | ftxui::flex;
 }

@@ -11,8 +11,8 @@
 
 enum TuringDirection { Left, Right, NoMove };
 
-const char TURING_EMPTY = '#';
-const std::string TURING_EMPTY_STR{TURING_EMPTY};
+extern const char TURING_EMPTY;
+extern const std::string TURING_EMPTY_STR;
 
 struct TuringTurn {
     TuringTurn();

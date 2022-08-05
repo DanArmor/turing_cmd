@@ -1,6 +1,10 @@
 #include "turing.hpp"
 
+const char TURING_EMPTY = '#';
+const std::string TURING_EMPTY_STR{TURING_EMPTY};
+
 // Turing turn section
+
 
 TuringTurn::TuringTurn()
     : oldState(-1),

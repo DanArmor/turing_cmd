@@ -12,7 +12,22 @@
 
 using namespace nlohmann;
 
+#ifdef DEBUG
+std::ofstream DEBUG_output;
+#endif
+
 int main(int argc, char **argv) {
+    #ifdef DEBUG
+    DEBUG_output.open("DEBUG_log.txt");
+    if(!DEBUG_output){
+        std::cout << "Failed to create a debug log file";
+        exit(3);
+    }
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    DEBUG_write("Start of debug session: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S"));
+    #endif
+
     auto screen = ftxui::ScreenInteractive::TerminalOutput();
     auto ui = ftxui::Make<TuringUI>(screen.ExitLoopClosure(), &screen);
     try{

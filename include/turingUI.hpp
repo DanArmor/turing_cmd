@@ -16,6 +16,7 @@
 using namespace nlohmann;
 
 #include "turing.hpp"
+#include "translate.hpp"
 
 class TuringCellUI : public ftxui::ComponentBase {
    private:
@@ -154,6 +155,8 @@ class TuringUI : public ftxui::ComponentBase {
     void makeTurn(void);
     void updateStateTape(void);
     void saveToFile(void);
+    std::vector<std::string> breakByLines(std::string str);
+    ftxui::Element breakByLinesElement(std::string str);
     std::function<void()> quit;
     TuringState state;
     TuringMachine machine;
@@ -162,6 +165,7 @@ class TuringUI : public ftxui::ComponentBase {
     std::atomic<bool> isRunning = false;
     std::atomic<bool> isShowingHelp = false;
     std::atomic<bool> isErrorFile = false;
+    LANG language = LANG::L_EN;
 
     std::atomic<bool> wasTriedToSave = false;
     enum SaveStatus{
@@ -175,6 +179,7 @@ class TuringUI : public ftxui::ComponentBase {
     TuringUIStatus status;
 
     ftxui::Component helpButton;
+    ftxui::Component localeButton;
 
     ftxui::Component moveTapeLeftButton;
     ftxui::Component moveTapeRightButton;
@@ -201,6 +206,7 @@ class TuringUI : public ftxui::ComponentBase {
     void refresh(void);
 
     void loadSave(TuringSave);
+    std::string &getText(std::string const &key);
 
     ftxui::Element Render() override;
     bool OnEvent(ftxui::Event) override;
