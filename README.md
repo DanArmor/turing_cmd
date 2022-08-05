@@ -10,15 +10,15 @@ Turing machine with TUI
 
 ## Table of contents
 - [turing_cmd](#turing-cmd)
-  * [Features:](#features)
-    + [Example of save/load:](#example-of-save-load)
-    + [Full reference text:](#full-reference-text)
-  * [Known issues:](#known-issues)
-  * [Installation:](#installation)
+  * [Features](#features)
+    + [Example of save/load](#example-of-save-load)
+    + [Full reference text](#full-reference-text)
+  * [Known issues](#known-issues)
+  * [Installation](#installation)
     + [Ubuntu/Debian:](#ubuntu-debian)
-  * [Build:](#build)
-  * [Thanks for libraries creators:](#thanks-for-libraries-creators)
-  * [Changelog:](#changelog)
+  * [Build](#build)
+  * [Thanks for libraries creators](#thanks-for-libraries-creators)
+  * [Changelog](#changelog)
 
 
 <a name="features"/>
