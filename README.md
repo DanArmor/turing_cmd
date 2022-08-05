@@ -39,7 +39,7 @@ You can navigate with keyboard arrows or with mouse, exit by Esc. There are hotk
 <a name="full-reference-text"/>
 
 ### Full reference text:
-![3.png](forReadme/3.png) 
+![3.png](forReadme/EN-help.png) 
 
 <a name="known-issues"/>
 

@@ -38,7 +38,7 @@
 <a name="full-reference-text"/>
 
 ### Полный текст справки:
-![3.png](forReadme/3.png) 
+![3.png](forReadme/RU-help.png) 
 
 <a name="known-issues"/>
 
