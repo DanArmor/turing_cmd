@@ -8,7 +8,7 @@ Turing machine with TUI
 
 ![1.gif](forReadme/1.gif)
 
-Table of contents
+## Table of contents
 - [turing_cmd](#turing-cmd)
   * [Features:](#features)
     + [Example of save/load:](#example-of-save-load)
