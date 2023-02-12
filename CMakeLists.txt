@@ -1,52 +1,41 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.24)
 
 project(Turing
   LANGUAGES CXX
   VERSION 0.2
 )
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 include(FetchContent)
 
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+
 FetchContent_Declare(ftxui
   GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
-  GIT_TAG v3.0.0
+  GIT_TAG v4.0.0
+  FIND_PACKAGE_ARGS NAMES ftxui
 )
 
 FetchContent_Declare(json
     GIT_REPOSITORY https://github.com/nlohmann/json
     GIT_TAG v3.10.5
+    FIND_PACKAGE_ARGS NAMES nlohmann_json
 )
 
-FetchContent_GetProperties(json)
-if(NOT json_POPULATED)
-  FetchContent_Populate(json)
-  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
-
-FetchContent_GetProperties(ftxui)
-if(NOT ftxui_POPULATED)
-  FetchContent_Populate(ftxui)
-  add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailable(ftxui json)
 
 set(CMAKE_CXX_STANDARD 23)
 
 include_directories(include)
-#include_directories(${json_SOURCE_DIR}/include)
 
 add_library(TuringLib src/turing.cpp)
 add_library(TuringUI src/turingUI.cpp)
 add_library(Translate src/translate.cpp)
 
 target_link_libraries(Translate TuringLib)
-#add_library(Utils src/utils.cpp)
 
 target_link_libraries(TuringUI PRIVATE Translate ftxui::screen ftxui::dom ftxui::component TuringLib nlohmann_json::nlohmann_json)
-
-#target_link_libraries(Utils PRIVATE nlohmann_json::nlohmann_json)
 
 add_executable(turing-cmd src/main.cpp)
 target_link_libraries(turing-cmd PRIVATE Translate ftxui::screen ftxui::dom ftxui::component TuringLib TuringUI nlohmann_json::nlohmann_json)

@@ -49,6 +49,8 @@
 
 ## Установка
 
+Вы можете использовать скомпилированную версию из [релизов](https://github.com/DanArmor/turing_cmd/releases) (пока только для Linux).
+
 <a name="ubuntu-debian"/>
 
 ### Ubuntu/Debian:

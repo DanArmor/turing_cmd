@@ -50,6 +50,8 @@ You can navigate with keyboard arrows or with mouse, exit by Esc. There are hotk
 
 ## Installation:
 
+You can use binaries from [releases](https://github.com/DanArmor/turing_cmd/releases) (Linux only for now).
+
 <a name="ubuntu-debian"/>
 
 ### Ubuntu/Debian:
@@ -74,6 +76,9 @@ There are two deps, but if you have CMake - you're ready to go: make a "build" d
 <a name="changelog"/>
 
 ## Changelog:
+
+v0.2.1 - FTXUI V4.0.0
+
 v0.2 - moved to nlohmann/json, replaced wchar/wstring with char/string, changed save/load notification, moved to FTXUI V3.0.0
 
 v0.1 - init version
