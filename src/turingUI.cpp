@@ -327,17 +327,19 @@ TuringUI::TuringUI(std::function<void()> quitFunc, ftxui::ScreenInteractive *scr
 
 
     stepButton = ftxui::Button("Step", [this]() {
-        this->status.status = TuringUIStatus::STEP;
-        if(this->isResetState){
-            this->isResetState = false;
-            this->updateStateTape();
-            this->machine.loadState(this->state);
-            this->updateComponents();
-        }
-        if(!this->machine.isDone()){
-            this->makeTurn();
-        } else if(this->status.status != TuringUIStatus::STOP) {
-            this->status.status = TuringUIStatus::STOP;
+        if(this->status.status != TuringUIStatus::RUNNING_ON) {
+            this->status.status = TuringUIStatus::STEP;
+            if(this->isResetState){
+                this->isResetState = false;
+                this->updateStateTape();
+                this->machine.loadState(this->state);
+                this->updateComponents();
+            }
+            if(!this->machine.isDone()){
+                this->makeTurn();
+            } else if(this->status.status != TuringUIStatus::STOP) {
+                this->status.status = TuringUIStatus::STOP;
+            }
         }
     });
 
