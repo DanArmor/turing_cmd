@@ -25,7 +25,7 @@ FetchContent_Declare(json
 
 FetchContent_MakeAvailable(ftxui json)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 include_directories(include)
 
